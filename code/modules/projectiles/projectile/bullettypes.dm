@@ -20,8 +20,10 @@ There are important things regarding this file:
 	recoil = 3
 
 /obj/item/projectile/bullet/pistol/hv
+	damage_types = list(BRUTE = 30)
 	armor_penetration = 20
 	step_delay = 0.75
+	recoil = 4.5
 
 /obj/item/projectile/bullet/pistol/practice
 	name = "practice bullet"
@@ -69,8 +71,10 @@ There are important things regarding this file:
 	can_ricochet = FALSE
 
 /obj/item/projectile/bullet/srifle/hv
+	damage_types = list(BRUTE = 26)
 	armor_penetration = 35
 	step_delay = 0.75
+	recoil = 6
 
 /obj/item/projectile/bullet/srifle/rubber
 	icon_state = "rubber"
@@ -105,9 +109,11 @@ There are important things regarding this file:
 	can_ricochet = FALSE
 
 /obj/item/projectile/bullet/clrifle/hv
+	damage_types = list(BRUTE = 28)
 	armor_penetration = 25
 	step_delay = 0.75
 	can_ricochet = TRUE
+	recoil = 5
 
 /obj/item/projectile/bullet/clrifle/rubber
 	icon_state = "rubber"
@@ -142,8 +148,10 @@ There are important things regarding this file:
 	can_ricochet = FALSE
 
 /obj/item/projectile/bullet/lrifle/hv
+	damage_types = list(BRUTE = 29)
 	armor_penetration = 30
 	step_delay = 0.75
+	recoil = 7
 
 /obj/item/projectile/bullet/lrifle/rubber
 	icon_state = "rubber"
@@ -177,8 +185,10 @@ There are important things regarding this file:
 	can_ricochet = FALSE
 
 /obj/item/projectile/bullet/magnum/hv
+	damage_types = list(BRUTE = 35)
 	armor_penetration = 25
 	step_delay = 0.75
+	recoil = 9
 
 /obj/item/projectile/bullet/magnum/rubber
 	icon_state = "rubber"
