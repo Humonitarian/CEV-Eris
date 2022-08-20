@@ -3,6 +3,8 @@
 	name = "Emergency energy shield"
 	desc = "An energy shield used to contain hull breaches."
 	icon = 'icons/effects/effects.dmi'
+	description_info = "Generates atmospheric blocking-shields when in contact with space"
+	description_antag = "The shields block bullets, but not lasers."
 	icon_state = "shield-old"
 	density = TRUE
 	opacity = 0
@@ -16,6 +18,7 @@
 /obj/machinery/shield/malfai
 	name = "emergency forcefield"
 	desc = "A powerful forcefield which seems to be projected by the vessel's emergency atmosphere containment field."
+	description_antag = "This special shield is overcharged, it has double the health of a normal one and only blocks bullets."
 	health = 400
 
 /obj/machinery/shield/proc/check_failure()
@@ -84,6 +87,9 @@
 			qdel(src)
 		if(2)
 			if(prob(50))
+				qdel(src)
+		if(3)
+			if(prob(25))
 				qdel(src)
 
 
@@ -323,9 +329,9 @@
 		..()
 
 
-/obj/machinery/shieldgen/on_update_icon()
+/obj/machinery/shieldgen/update_icon()
 	if(active && !(stat & NOPOWER))
-		src.SetIconState(malfunction ? "shieldonbr":"shieldon")
+		src.icon_state = malfunction ? "shieldonbr":"shieldon"
 	else
-		src.SetIconState(malfunction ? "shieldoffbr":"shieldoff")
+		src.icon_state = malfunction ? "shieldoffbr":"shieldoff"
 	return

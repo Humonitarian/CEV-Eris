@@ -18,14 +18,16 @@
 	load_method = MAGAZINE
 	mag_well = MAG_WELL_PISTOL
 	magazine_type = /obj/item/ammo_magazine/cspistol
-	damage_multiplier = 1.2
-	penetration_multiplier = 1.7
-	recoil_buildup = 2
+	proj_step_multiplier = 0.8
+	damage_multiplier = 1.6
+	penetration_multiplier = 3
+	init_recoil = HANDGUN_RECOIL(0.6)
 
 	spawn_tags = SPAWN_TAG_FS_PROJECTILE
+	gun_parts = list(/obj/item/part/gun/frame/mandella = 1, /obj/item/part/gun/grip/black = 1, /obj/item/part/gun/mechanism/pistol = 1, /obj/item/part/gun/barrel/clrifle = 1)
 
 
-/obj/item/gun/projectile/mandella/on_update_icon()
+/obj/item/gun/projectile/mandella/update_icon()
 	..()
 
 	var/iconstring = initial(icon_state)
@@ -41,3 +43,12 @@
 /obj/item/gun/projectile/mandella/Initialize()
 	. = ..()
 	update_icon()
+
+/obj/item/part/gun/frame/mandella
+	name = "Mandella frame"
+	desc = "A Mandella pistol frame. Covertness never looked so good."
+	icon_state = "frame_mandella"
+	result = /obj/item/gun/projectile/mandella
+	grip = /obj/item/part/gun/grip/black
+	mechanism = /obj/item/part/gun/mechanism/pistol
+	barrel = /obj/item/part/gun/barrel/clrifle

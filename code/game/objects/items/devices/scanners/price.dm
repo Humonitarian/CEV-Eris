@@ -21,7 +21,7 @@
 		scan_data = price_scan_results(target)
 	else
 		scan_data += "<br>[price_scan_results(target)]"
-	FLICK("reader1", src)
+	flick("reader1", src)
 	show_results(user)
 
 /obj/item/device/scanner/price/afterattack(atom/A, mob/user, proximity)
@@ -31,7 +31,7 @@
 
 /proc/price_scan_results(atom/movable/target)
 	var/list/data = list()
-	var/price = SStrade.get_export_cost(target)
+	var/price = SStrade.get_price(target)
 
 	if(price)
 		data += "<span class='notice'>Scanned [target], value: <b>[price]</b> \

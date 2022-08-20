@@ -27,15 +27,15 @@
 	. = ..()
 	update_icon()
 
-/obj/item/hatton/on_update_icon()
+/obj/item/hatton/update_icon()
 	cut_overlays()
 	if(magazine)
 		if(magazine.charge)
 			icon_state = "Hatton_Hammer_1"
-			add_overlays(icon(icon, "[magazine.charge]/3"))
+			overlays += icon(icon, "[magazine.charge]/3")
 		else
 			icon_state = "Hatton_Hammer_1_empty"
-			add_overlays(icon(icon, "1/3"))
+			overlays += icon(icon, "1/3")
 	else
 		icon_state="Hatton_Hammer_0"
 
@@ -90,11 +90,11 @@
 		click_empty()
 		return
 
-	if(isliving(user))
-		var/mob/living/M = user
-		if (HULK in M.mutations)
-			to_chat(M, SPAN_WARNING("Your meaty finger is much too large for the trigger guard!"))
-			return
+//	if(isliving(user))
+//		var/mob/living/M = user
+//		if (HULK in M.mutations)
+//			to_chat(M, SPAN_WARNING("Your meaty finger is much too large for the trigger guard!"))
+//			return
 	if (!Adjacent(loc, target))
 		to_chat(user, SPAN_WARNING("You're too far away to breach that!"))
 		return
@@ -107,7 +107,7 @@
 
 
 
-	if(isliving(user))
+/*	if(isliving(user))
 		var/mob/living/M = user
 		if ((CLUMSY in M.mutations) && prob(50))
 			to_chat(user, SPAN_DANGER("[src] blows up in your face."))
@@ -115,7 +115,7 @@
 			Fire(get_turf(M))
 			del(src)
 			return
-
+*/
 	if (use_charge())
 		last_fired = world.time
 		playsound(user, fire_sound, 70, 1)
@@ -161,7 +161,7 @@
 	. = ..()
 	update_icon()
 
-/obj/item/hatton_magazine/on_update_icon()
+/obj/item/hatton_magazine/update_icon()
 	if(charge)
 		icon_state = "Hatton_box1"
 	else
@@ -173,7 +173,7 @@
 	matter = list(MATERIAL_PLASMA = 10, MATERIAL_PLASTEEL = 2, MATERIAL_PLASTIC = 2)
 	charge = 2
 
-/obj/item/hatton_magazine/moebius/on_update_icon()
+/obj/item/hatton_magazine/moebius/update_icon()
 	if(charge)
 		icon_state = "Moebius_box1"
 	else
@@ -212,15 +212,15 @@
 	matter = list(MATERIAL_PLASTEEL = 8, MATERIAL_SILVER = 5, MATERIAL_PLASTIC = 5)
 	spawn_blacklisted = TRUE
 
-/obj/item/hatton/moebius/on_update_icon()
+/obj/item/hatton/moebius/update_icon()
 	cut_overlays()
 	if(magazine)
 		if(magazine.charge)
 			icon_state = "Moebius_Hammer_1"
-			add_overlays(icon(icon, "[magazine.charge]/3"))
+			overlays += icon(icon, "[magazine.charge]/3")
 		else
 			icon_state = "Moebius_Hammer_1_empty"
-			add_overlays(icon(icon, "1/3"))
+			overlays += icon(icon, "1/3")
 	else
 		icon_state = "Moebius_Hammer_0"
 

@@ -12,7 +12,7 @@
 	origin_tech = list(TECH_COMBAT = 4, TECH_MATERIAL = 1)
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
-	mag_well = MAG_WELL_RIFLE
+	mag_well = MAG_WELL_RIFLE|MAG_WELL_RIFLE_L
 	magazine_type = /obj/item/ammo_magazine/srifle
 	matter = list(MATERIAL_PLASTEEL = 20, MATERIAL_PLASTIC = 12)
 	price_tag = 2000
@@ -22,26 +22,31 @@
 	cocked_sound = 'sound/weapons/guns/interact/ltrifle_cock.ogg'
 	damage_multiplier = 1.2 //30
 	penetration_multiplier = 1.4 //35
-	recoil_buildup = 2
-	one_hand_penalty = 20 //full sized rifle
+	init_recoil = RIFLE_RECOIL(1)
 	zoom_factor = 0.6
 	fire_delay = 6.5
+	gun_parts = list(/obj/item/part/gun/frame/kovacs = 1, /obj/item/part/gun/grip/serb = 1, /obj/item/part/gun/mechanism/autorifle = 1, /obj/item/part/gun/barrel/srifle = 1)
+	serial_type = "SA"
 
-/obj/item/gun/projectile/kovacs/on_update_icon()
+
+
+/obj/item/gun/projectile/kovacs/update_icon()
 	..()
 
 	var/iconstring = initial(icon_state)
-	var/itemstring = ""
-
-	if (ammo_magazine)
-		iconstring += "[ammo_magazine? "_mag": ""]"
-
-	if (!ammo_magazine || !length(ammo_magazine.stored_ammo))
-		iconstring += "_slide"
+	iconstring = initial(icon_state) + (ammo_magazine ? "_mag" + (ammo_magazine.mag_well == MAG_WELL_RIFLE_L ? "_l" : (ammo_magazine.mag_well == MAG_WELL_RIFLE_D ? "_d" : "")) : "")
 
 	icon_state = iconstring
-	set_item_state(itemstring)
 
 /obj/item/gun/projectile/kovacs/Initialize()
 	. = ..()
 	update_icon()
+
+/obj/item/part/gun/frame/kovacs
+	name = "Kovacs frame"
+	desc = "A Kovacs battle rifle frame. To punch through armor with panache."
+	icon_state = "frame_kovacs"
+	result = /obj/item/gun/projectile/kovacs
+	grip = /obj/item/part/gun/grip/serb
+	mechanism = /obj/item/part/gun/mechanism/autorifle
+	barrel = /obj/item/part/gun/barrel/srifle

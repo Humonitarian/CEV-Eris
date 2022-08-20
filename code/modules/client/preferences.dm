@@ -190,7 +190,7 @@
 	character.gender = gender
 	character.age = age
 	character.b_type = b_type
-
+	character.tts_seed = tts_seed
 	character.h_style = h_style
 	character.f_style = f_style
 
@@ -204,7 +204,7 @@
 
 	character.s_tone = s_tone
 
-	QDEL_NULL_LIST(character.worn_underwear)
+	QDEL_LIST(character.worn_underwear)
 	character.worn_underwear = list()
 
 	for(var/underwear_category_name in all_underwear)

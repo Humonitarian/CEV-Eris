@@ -8,8 +8,6 @@
 	bad_type = /obj/item/gun/energy
 	spawn_tags = SPAWN_TAG_GUN_ENERGY
 
-	recoil_buildup = 0.5 //energy weapons have little to no recoil
-
 	var/charge_cost = 100 //How much energy is needed to fire.
 	var/obj/item/cell/cell
 	var/suitable_cell = /obj/item/cell/medium
@@ -106,7 +104,7 @@
 	to_chat(user, "Has [shots_remaining] shot\s remaining.")
 	return
 
-/obj/item/gun/energy/on_update_icon(var/ignore_inhands)
+/obj/item/gun/energy/update_icon(var/ignore_inhands)
 	if(charge_meter)
 		var/ratio = 0
 
@@ -159,14 +157,21 @@
 		to_chat(usr, SPAN_WARNING("[src] is a disposable gun, it doesn't need more batteries."))
 		return
 
-	if(cell)
-		to_chat(usr, SPAN_WARNING("[src] is already loaded."))
-		return
+	if(istype(C, suitable_cell))
+		if(cell)
+			if(replace_item(cell, C, user))
+				cell = C
+				update_icon()
+		else if(insert_item(C, user))
+			cell = C
+			update_icon()
+	..()
 
-	if(istype(C, suitable_cell) && insert_item(C, user))
-		cell = C
+/obj/item/gun/energy/attack_self(mob/user)
+	if(!self_recharge && cell && cell.charge < charge_cost && eject_item(cell, user))
+		cell = null
 		update_icon()
-
+		return
 	..()
 
 /obj/item/gun/energy/ui_data(mob/user)

@@ -43,12 +43,12 @@
 	else
 		..()
 
-/obj/item/pinpointer/on_update_icon()
+/obj/item/pinpointer/update_icon()
 	cut_overlays()
 
 	if (slot)
 		var/tooloverlay = "disknukeloaded"
-		add_overlays((tooloverlay))
+		overlays += (tooloverlay)
 
 
 /obj/item/pinpointer/proc/workdisk()
@@ -226,9 +226,7 @@
 					if(!DNAstring)
 						return
 					for(var/mob/living/carbon/M in SSmobs.mob_list)
-						if(!M.dna)
-							continue
-						if(M.dna.unique_enzymes == DNAstring)
+						if(M.dna_trace == DNAstring)
 							target = M
 							break
 

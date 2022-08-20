@@ -10,15 +10,13 @@
 	suit_type = "crimson hardsuit"
 	armor = list(
 		melee = 50,
-		bullet = 45,
-		energy = 30,
+		bullet = 60,
+		energy = 40,
 		bomb = 75,
 		bio = 100,
 		rad = 50
 	)
-	slowdown = 1
 	drain = 3.5
-	offline_slowdown = 3
 	offline_vision_restriction = 1
 
 	helm_type = /obj/item/clothing/head/space/rig/merc
@@ -31,13 +29,17 @@
 		/obj/item/rig_module/ai_container,
 		/obj/item/rig_module/power_sink,
 		/obj/item/rig_module/electrowarfare_suite,
-		/obj/item/rig_module/chem_dispenser/combat,
-		/obj/item/rig_module/fabricator/energy_net
+		/obj/item/rig_module/modular_injector/combat,
+		/obj/item/rig_module/fabricator/energy_net,
+		/obj/item/rig_module/storage
 		)
+	stiffness = 0
+	obscuration = 0
 
 //Has most of the modules removed
 /obj/item/rig/merc/empty
 	initial_modules = list(
 		/obj/item/rig_module/ai_container,
-		/obj/item/rig_module/electrowarfare_suite, //might as well
+		/obj/item/rig_module/electrowarfare_suite, // might as well
+		/obj/item/rig_module/storage
 		)

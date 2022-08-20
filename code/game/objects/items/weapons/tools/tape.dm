@@ -2,6 +2,8 @@
 	name = "duct tape"
 	desc = "The technomancer's eternal friend. Fixes just about anything, for a while at least."
 	icon = 'icons/obj/tools.dmi'
+	description_info = "Can be used for crafting or to repair tools"
+	description_antag = "Can be used to make makeshift mouthwraps and to tape cameras silently"
 	icon_state = "taperoll"
 	w_class = ITEM_SIZE_SMALL
 	tool_qualities = list(QUALITY_ADHESIVE = 30, QUALITY_SEALING = 30)
@@ -156,14 +158,14 @@
 	update_icon()
 	name = W.name + " (taped)"
 
-/obj/item/ducttape/on_update_icon()
+/obj/item/ducttape/update_icon()
 	if (!stuck)
 		return
 
 	if (istype(stuck, /obj/item/paper))
 		icon_state = stuck.icon_state
 		cut_overlays()
-		set_overlays(stuck.overlays + "tape_overlay")
+		overlays = stuck.overlays + "tape_overlay"
 	else
 		var/mutable_appearance/MA = new(stuck)
 		MA.layer = layer-0.1
@@ -183,7 +185,7 @@
 	stuck.forceMove(get_turf(src))
 	user.put_in_hands(stuck)
 	stuck = null
-	set_overlays(null)
+	overlays = null
 	qdel(src)
 
 /obj/item/ducttape/afterattack(A, mob/user, flag, params)

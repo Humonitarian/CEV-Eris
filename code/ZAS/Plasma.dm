@@ -51,11 +51,11 @@ obj/var/contaminated = 0
 	//Do a contamination overlay? Temporary measure to keep contamination less deadly than it was.
 	if(!contaminated)
 		contaminated = 1
-		add_overlays(contamination_overlay)
+		overlays += contamination_overlay
 
 /obj/item/proc/decontaminate()
 	contaminated = 0
-	remove_overlays(contamination_overlay)
+	overlays -= contamination_overlay
 
 /mob/proc/contaminate()
 
@@ -106,14 +106,6 @@ obj/var/contaminated = 0
 				else
 					if(!(wear_mask.body_parts_covered & EYES))
 						burn_eyes()
-
-	//Genetic Corruption
-	if(vsc.plc.GENETIC_CORRUPTION)
-		if(rand(1,10000) < vsc.plc.GENETIC_CORRUPTION)
-			randmutb(src)
-			to_chat(src, SPAN_DANGER("High levels of toxins cause you to spontaneously mutate!"))
-			domutcheck(src,null)
-
 
 /mob/living/carbon/human/proc/burn_eyes()
 	//The proc that handles eye burning.

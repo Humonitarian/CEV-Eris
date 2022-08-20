@@ -12,7 +12,7 @@
 
 	ghostize()
 	..()
-	return QDEL_HINT_HARDDEL
+	return QDEL_HINT_QUEUE
 
 /mob/proc/despawn()
 	return
@@ -37,30 +37,30 @@
 	. = ..()
 
 /mob/proc/show_message(msg, type, alt, alt_type)//Message, type of message (1 or 2), alternative message, alt message type (1 or 2)
+	if(!client)
+		return
 
-	if(!client)	return
-
-	if (type)
-		if(type & 1 && (sdisabilities & BLIND || blinded || paralysis) )//Vision related
-			if (!( alt ))
+	if(type)
+		if(type & 1 && (sdisabilities & BLIND || blinded || paralysis)) //Vision related
+			if(!alt)
 				return
 			else
 				msg = alt
 				type = alt_type
-		if (type & 2 && (sdisabilities & DEAF || ear_deaf))//Hearing related
-			if (!( alt ))
+		if(type & 2 && (sdisabilities & DEAF || ear_deaf)) //Hearing related
+			if(!alt)
 				return
 			else
 				msg = alt
 				type = alt_type
-				if ((type & 1 && sdisabilities & BLIND))
+				if((type & 1 && sdisabilities & BLIND))
 					return
+
 	// Added voice muffling for Issue 41.
 	if(stat == UNCONSCIOUS || sleeping > 0)
 		to_chat(src, "<I>... You can almost hear someone talking ...</I>")
 	else
 		to_chat(src, msg)
-	return
 
 // Show a message to all mobs and objects in sight of this one
 // This would be for visible actions by the src mob
@@ -176,7 +176,10 @@
 	if ((incapacitation_flags & INCAPACITATION_STUNNED) && stunned)
 		return 1
 
-	if ((incapacitation_flags & INCAPACITATION_FORCELYING) && (weakened || resting || pinned.len))
+	if ((incapacitation_flags & INCAPACITATION_SOFTLYING) && (resting || weakened))
+		return 1
+
+	if ((incapacitation_flags & INCAPACITATION_FORCELYING) && pinned.len)
 		return 1
 
 	if ((incapacitation_flags & INCAPACITATION_UNCONSCIOUS) && (stat || paralysis || sleeping || (status_flags & FAKEDEATH)))
@@ -715,7 +718,7 @@ Note from Nanako: 2019-02-01
 TODO: Bay Movement:
 All Canmove setting in this proc is temporary. This var should not be set from here, but from movement controllers
 */
-/mob/proc/update_lying_buckled_and_verb_status()
+/mob/proc/update_lying_buckled_and_verb_status(dropitems = FALSE)
 
 	if(!resting && cannot_stand() && can_stand_overridden())
 		lying = 0
@@ -731,13 +734,14 @@ All Canmove setting in this proc is temporary. This var should not be set from h
 				anchored = FALSE
 		canmove = FALSE //TODO: Remove this
 	else
-		lying = incapacitated(INCAPACITATION_KNOCKDOWN)
+		lying = incapacitated(INCAPACITATION_GROUNDED)
 		canmove = FALSE //TODO: Remove this
 
 	if(lying)
 		set_density(0)
-		if(l_hand) unEquip(l_hand)
-		if(r_hand) unEquip(r_hand)
+		if(stat == UNCONSCIOUS || dropitems)
+			if(l_hand) unEquip(l_hand) //we want to be able to keep items, for tactical resting and ducking behind cover
+			if(r_hand) unEquip(r_hand)
 	else
 		canmove = TRUE
 		set_density(initial(density))
@@ -750,6 +754,7 @@ All Canmove setting in this proc is temporary. This var should not be set from h
 	//Temporarily moved here from the various life() procs
 	//I'm fixing stuff incrementally so this will likely find a better home.
 	//It just makes sense for now. ~Carn
+	// Fuck you Carn its been more than 6 years and people still lag from your shitty forced icon updates . SPCR -2022
 	if( update_icon )	//forces a full overlay update
 		update_icon = 0
 		regenerate_icons()
@@ -816,11 +821,11 @@ All Canmove setting in this proc is temporary. This var should not be set from h
 		update_lying_buckled_and_verb_status()
 	return
 
-/mob/proc/Weaken(amount)
+/mob/proc/Weaken(amount, dropitems = TRUE)
 	if(status_flags & CANWEAKEN)
 		facing_dir = null
 		weakened = max(max(weakened,amount),0)
-		update_lying_buckled_and_verb_status()	//updates lying, canmove and icons
+		update_lying_buckled_and_verb_status(dropitems)	//updates lying, canmove and icons
 	return
 
 /mob/proc/SetWeakened(amount)
@@ -897,9 +902,9 @@ All Canmove setting in this proc is temporary. This var should not be set from h
 	return
 
 /mob/living/flash_weak_pain()
-//	FLICK("weak_pain", flash["pain"])
+//	flick("weak_pain", flash["pain"])
 	if(HUDtech.Find("pain"))
-		FLICK("weak_pain", HUDtech["pain"])
+		flick("weak_pain", HUDtech["pain"])
 
 
 /mob/proc/get_visible_implants()
@@ -1055,9 +1060,8 @@ mob/proc/yank_out_object()
 
 //Check for brain worms in head.
 /mob/proc/has_brain_worms()
-
 	for(var/I in contents)
-		if(istype(I,/mob/living/simple_animal/borer))
+		if(istype(I, /mob/living/simple_animal/borer))
 			return I
 
 	return FALSE
@@ -1120,10 +1124,7 @@ mob/proc/yank_out_object()
 	if (stats) // Check if mob has stats. Otherwise we cannot read null.perks
 		for(var/perk in stats.perks)
 			var/datum/perk/P = perk
-			var/filename = sanitizeFileName("[P.type].png")
-			var/asset = asset_cache.cache[filename] // this is definitely a hack, but getAtomCacheFilename accepts only atoms for no fucking reason whatsoever.
-			if(asset)
-				Plist += "<td valign='middle'><img src=[filename]></td><td><span style='text-align:center'>[P.name]<br>[P.desc]</span></td>"
+			Plist += "<td valign='middle'><img src=[SSassets.transport.get_asset_url(P.type)]></td><td><span style='text-align:center'>[P.name]<br>[P.desc]</span></td>"
 	data += {"
 		<table width=80%>
 			<th colspan=2>Perks</th>
@@ -1165,19 +1166,39 @@ mob/proc/yank_out_object()
 
 /mob/verb/northfaceperm()
 	set hidden = 1
-	set_face_dir(client.client_dir(NORTH))
+	if(facing_dir)
+		facing_dir = null
+		to_chat(usr, "You are now not facing anything.")
+	else
+		set_face_dir(client.client_dir(NORTH))
+		to_chat(usr, "You are now facing north.")
 
 /mob/verb/southfaceperm()
 	set hidden = 1
-	set_face_dir(client.client_dir(SOUTH))
+	if(facing_dir)
+		facing_dir = null
+		to_chat(usr, "You are now not facing anything.")
+	else
+		set_face_dir(client.client_dir(SOUTH))
+		to_chat(usr, "You are now facing south.")
 
 /mob/verb/eastfaceperm()
 	set hidden = 1
-	set_face_dir(client.client_dir(EAST))
+	if(facing_dir)
+		facing_dir = null
+		to_chat(usr, "You are now not facing anything.")
+	else
+		set_face_dir(client.client_dir(EAST))
+		to_chat(usr, "You are now facing east.")
 
 /mob/verb/westfaceperm()
 	set hidden = 1
-	set_face_dir(client.client_dir(WEST))
+	if(facing_dir)
+		facing_dir = null
+		to_chat(usr, "You are now not facing anything.")
+	else
+		set_face_dir(client.client_dir(WEST))
+		to_chat(usr, "You are now facing west.")
 
 /mob/verb/change_move_intent()
 	set name = "Change moving intent"

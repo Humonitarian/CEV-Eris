@@ -17,13 +17,13 @@
 	var/atom/cocoon_target
 	poison_type = "aranecolmin"
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/spider/nurse
-	move_to_delay = 5
+	move_to_delay = 3
 	meat_amount = 3
 	rarity_value = 75
 	var/fed = 0
 	var/egg_inject_chance = 4
 
-/mob/living/carbon/superior_animal/giant_spider/nurse/attemptAttackOnTarget()
+/mob/living/carbon/superior_animal/giant_spider/nurse/UnarmedAttack()
 	..()
 	if(ishuman(target_mob))
 		var/mob/living/carbon/human/H = target_mob

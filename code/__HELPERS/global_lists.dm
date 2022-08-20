@@ -49,7 +49,6 @@ GLOBAL_LIST_EMPTY(joblist)					//list of all jobstypes, minus borg and AI
 GLOBAL_LIST_EMPTY(all_departments)			//List of all department datums
 var/global/list/department_IDs = list(DEPARTMENT_COMMAND, DEPARTMENT_MEDICAL, DEPARTMENT_ENGINEERING,
  DEPARTMENT_SCIENCE, DEPARTMENT_SECURITY, DEPARTMENT_GUILD, DEPARTMENT_CHURCH, DEPARTMENT_CIVILIAN, DEPARTMENT_OFFSHIP)
-GLOBAL_LIST_EMPTY(global_corporations)
 
 
 GLOBAL_LIST_EMPTY(HUDdatums)
@@ -134,6 +133,9 @@ var/global/list/syndicate_access = list(access_maint_tunnels, access_syndicate, 
 
 //A list of slots where an item doesn't count as "worn" if it's in one of them
 var/global/list/unworn_slots = list(slot_l_hand,slot_r_hand, slot_l_store, slot_r_store,slot_robot_equip_1,slot_robot_equip_2,slot_robot_equip_3)
+
+//Names that shouldn't trigger notifications about low health
+GLOBAL_LIST_EMPTY(ignore_health_alerts_from)
 
 //////////////////////////
 /////Initial Building/////
@@ -239,12 +241,6 @@ var/global/list/unworn_slots = list(slot_l_hand,slot_r_hand, slot_l_store, slot_
 	for(var/T in paths)
 		var/datum/poster/P = new T
 		GLOB.poster_designs += P
-
-	//Corporations
-	paths = subtypesof(/datum/corporation)
-	for(var/T in paths)
-		var/datum/corporation/C = new T
-		global.GLOB.global_corporations[C.name] = C
 
 	paths = subtypesof(/datum/hud)
 	for(var/T in paths)

@@ -134,27 +134,27 @@ mob
 		underlays += image(icon='old_or_unused.dmi',icon_state="red", pixel_x = -32)
 
 		// Testing image overlays
-		add_overlays(image(icon='old_or_unused.dmi',icon_state="green", pixel_x = 32, pixel_y = -32))
-		add_overlays(image(icon='old_or_unused.dmi',icon_state="green", pixel_x = 32, pixel_y = 32))
-		add_overlays(image(icon='old_or_unused.dmi',icon_state="green", pixel_x = -32, pixel_y = -32))
+		overlays += image(icon='old_or_unused.dmi',icon_state="green", pixel_x = 32, pixel_y = -32)
+		overlays += image(icon='old_or_unused.dmi',icon_state="green", pixel_x = 32, pixel_y = 32)
+		overlays += image(icon='old_or_unused.dmi',icon_state="green", pixel_x = -32, pixel_y = -32)
 
 		// Testing icon file overlays (defaults to mob's state)
-		add_overlays('_flat_demoIcons2.dmi')
+		overlays += '_flat_demoIcons2.dmi'
 
 		// Testing icon_state overlays (defaults to mob's icon)
-		add_overlays("white")
+		overlays += "white"
 
 		// Testing dynamic icon overlays
 		var/icon/I = icon('old_or_unused.dmi', icon_state="aqua")
 		I.Shift(NORTH, 16, 1)
-		add_overlays(I)
+		overlays+=I
 
 		// Testing dynamic image overlays
 		I=image(icon=I, pixel_x = -32, pixel_y = 32)
-		add_overlays(I)
+		overlays+=I
 
 		// Testing object types (and layers)
-		add_overlays(/obj/effect/overlayTest)
+		overlays+=/obj/effect/overlayTest
 
 		loc = locate (10, 10, 1)
 	verb
@@ -184,7 +184,7 @@ mob
 
 		Add_Overlay()
 			set name = "4. Add Overlay"
-			add_overlays(image(icon='old_or_unused.dmi',icon_state="yellow", pixel_x = rand(-64, 32), pixel_y = rand(-64, 32)))
+			overlays += image(icon='old_or_unused.dmi',icon_state="yellow", pixel_x = rand(-64, 32), pixel_y = rand(-64, 32))
 
 		Stress_Test()
 			set name = "5. Stress Test"
@@ -825,31 +825,36 @@ proc
 
 		return icon(flat, "", SOUTH)
 
-	getIconMask(atom/A)//By yours truly. Creates a dynamic mask for a mob/whatever. /N
-		var/icon/alpha_mask = new(A.icon, A.icon_state)//So we want the default icon and icon state of A.
-		for(var/I in A.overlays)//For every image in overlays. var/image/I will not work, don't try it.
-			if(I:layer>A.layer)	continue//If layer is greater than what we need, skip it.
-			var/icon/image_overlay = new(I:icon, I:icon_state)//Blend only works with icon objects.
-			//Also, icons cannot directly set icon_state. Slower than changing variables but whatever.
-			alpha_mask.Blend(image_overlay, ICON_OR)//OR so they are lumped together in a nice overlay.
-		return alpha_mask//And now return the mask.
+/proc/getIconMask(atom/A)//By yours truly. Creates a dynamic mask for a mob/whatever. /N
+	var/icon/alpha_mask = new(A.icon,A.icon_state)//So we want the default icon and icon state of A.
+	for(var/V in A.overlays)//For every image in overlays. var/image/I will not work, don't try it.
+		var/image/I = V
+		if(I.layer>A.layer)
+			continue//If layer is greater than what we need, skip it.
+		var/icon/image_overlay = new(I.icon,I.icon_state)//Blend only works with icon objects.
+		//Also, icons cannot directly set icon_state. Slower than changing variables but whatever.
+		alpha_mask.Blend(image_overlay,ICON_OR)//OR so they are lumped together in a nice overlay.
+	return alpha_mask//And now return the mask.
 
 /mob/proc/AddCamoOverlay(atom/A)//A is the atom which we are using as the overlay.
 	var/icon/opacity_icon = new(A.icon, A.icon_state)//Don't really care for overlays/underlays.
 	//Now we need to culculate overlays+underlays and add them together to form an image for a mask.
-	//var/icon/alpha_mask = getFlatIcon(src)//Accurate but SLOW. Not designed for running each tick. Could have other uses I guess.
-	var/icon/alpha_mask = getIconMask(src)//Which is why I created that proc. Also a little slow since it's blending a bunch of icons together but good enough.
+	var/icon/alpha_mask = getIconMask(src)//getFlatIcon(src) is accurate but SLOW. Not designed for running each tick. This is also a little slow since it's blending a bunch of icons together but good enough.
 	opacity_icon.AddAlphaMask(alpha_mask)//Likely the main source of lag for this proc. Probably not designed to run each tick.
 	opacity_icon.ChangeOpacity(0.4)//Front end for MapColors so it's fast. 0.5 means half opacity and looks the best in my opinion.
-	for(var/i=0, i<5, i++)//And now we add it as overlays. It's faster than creating an icon and then merging it.
+	for(var/i=0,i<5,i++)//And now we add it as overlays. It's faster than creating an icon and then merging it.
 		var/image/I = image("icon" = opacity_icon, "icon_state" = A.icon_state, "layer" = layer+0.8)//So it's above other stuff but below weapons and the like.
 		switch(i)//Now to determine offset so the result is somewhat blurred.
-			if(1)	I.pixel_x--
-			if(2)	I.pixel_x++
-			if(3)	I.pixel_y--
-			if(4)	I.pixel_y++
-		add_overlays(I)
-		//And finally add the overlay.
+			if(1)
+				I.pixel_x--
+			if(2)
+				I.pixel_x++
+			if(3)
+				I.pixel_y--
+			if(4)
+				I.pixel_y++
+		overlays += I//And finally add the overlay.
+		// add_overlay(I)//And finally add the overlay.
 
 /proc/getHologramIcon(icon/A, safety=1, var/hologram_opacity = 0.5, var/hologram_color)//If safety is on, a new icon is not created.
 	var/icon/flat_icon = safety ? A : new(A)//Has to be a new icon to not constantly change the same icon.
@@ -1041,44 +1046,135 @@ proc/get_average_color(var/icon, var/icon_state, var/image_dir)
 	GLOB.average_icon_color["[icon]:[icon_state]:[image_dir]"] = rgb(average_rgb[1],average_rgb[2],average_rgb[3])
 	return GLOB.average_icon_color["[icon]:[icon_state]:[image_dir]"]
 
-/proc/FLICK(state, datum/D)
-	if(istype(D))
-		return D.flicker(state)
+/// Generate a filename for this asset
+/// The same asset will always lead to the same asset name
+/// (Generated names do not include file extention.)
+/proc/generate_asset_name(file)
+	return "asset.[md5(fcopy_rsc(file))]"
+
+/**
+ * Converts an icon to base64. Operates by putting the icon in the iconCache savefile,
+ * exporting it as text, and then parsing the base64 from that.
+ * (This relies on byond automatically storing icons in savefiles as base64)
+ */
+/proc/icon2base64(icon/icon)
+	if (!isicon(icon))
+		return FALSE
+	var/savefile/dummySave = new("tmp/dummySave.sav")
+	WRITE_FILE(dummySave["dummy"], icon)
+	var/iconData = dummySave.ExportText("dummy")
+	var/list/partial = splittext(iconData, "{")
+	. = replacetext(copytext_char(partial[2], 3, -5), "\n", "") //if cleanup fails we want to still return the correct base64
+	dummySave.Unlock()
+	dummySave = null
+	fdel("tmp/dummySave.sav") //if you get the idea to try and make this more optimized, make sure to still call unlock on the savefile after every write to unlock it.
+
+/proc/icon2html(thing, target, icon_state, dir = SOUTH, frame = 1, moving = FALSE, sourceonly = FALSE, extra_classes = null)
+	if (!thing)
+		return
+
+	var/key
+	var/icon/I = thing
+
+	if (!target)
+		return
+	if (target == world)
+		target = clients
+
+	var/list/targets
+	if (!islist(target))
+		targets = list(target)
 	else
-		CRASH("[D](\ref[D]) is not datum, aborting /proc/FLICK. Additional info: {[json_encode(args)]}")
+		targets = target
+		if (!targets.len)
+			return
+	if (!isicon(I))
+		if (isfile(thing)) //special snowflake
+			var/name = sanitize_filename("[generate_asset_name(thing)].png")
+			if (!SSassets.cache[name])
+				SSassets.transport.register_asset(name, thing)
+			for (var/thing2 in targets)
+				SSassets.transport.send_assets(thing2, name)
+			if(sourceonly)
+				return SSassets.transport.get_asset_url(name)
+			return "<img class='[extra_classes] icon icon-misc' src='[SSassets.transport.get_asset_url(name)]'>"
+		var/atom/A = thing
 
-/datum/proc/flicker(iconOrState)
-	// To handle not only state changes in update icon if need
-	flick(iconOrState, src)
+		I = A.icon
 
-/atom/proc/SetIcon(value)
-	icon = value
+		if (isnull(icon_state))
+			icon_state = A.icon_state
+			//Despite casting to atom, this code path supports mutable appearances, so let's be nice to them
+			if(isnull(icon_state) || (isatom(thing) /* && A.flags_1 & HTML_USE_INITAL_ICON_1 */))
+				icon_state = initial(A.icon_state)
+				if (isnull(dir))
+					dir = initial(A.dir)
 
-/atom/proc/SetIconState(value)
-	icon_state = value
+		if (isnull(dir))
+			dir = A.dir
+
+		if (ishuman(thing)) // Shitty workaround for a BYOND issue.
+			var/icon/temp = I
+			I = icon()
+			I.Insert(temp, dir = SOUTH)
+			dir = SOUTH
+	else
+		if (isnull(dir))
+			dir = SOUTH
+		if (isnull(icon_state))
+			icon_state = ""
+
+	I = icon(I, icon_state, dir, frame, moving)
+
+	key = "[generate_asset_name(I)].png"
+	if(!SSassets.cache[key])
+		SSassets.transport.register_asset(key, I)
+	for (var/thing2 in targets)
+		SSassets.transport.send_assets(thing2, key)
+	if(sourceonly)
+		return SSassets.transport.get_asset_url(key)
+	return "<img class='[extra_classes] icon icon-[icon_state]' src='[SSassets.transport.get_asset_url(key)]'>"
+
+/proc/icon2base64html(thing)
+	if (!thing)
+		return
+	var/static/list/bicon_cache = list()
+	if (isicon(thing))
+		var/icon/I = thing
+		var/icon_base64 = icon2base64(I)
+
+		if (I.Height() > world.icon_size || I.Width() > world.icon_size)
+			var/icon_md5 = md5(icon_base64)
+			icon_base64 = bicon_cache[icon_md5]
+			if (!icon_base64) // Doesn't exist yet, make it.
+				bicon_cache[icon_md5] = icon_base64 = icon2base64(I)
 
 
-// Overlays' hadlers
-	//!!! DO NOT USE RAW overlays' OPERATIONS IF YOU DON'T KNOW WHY YOU USE THEM RAW !!!
-//associate_with_overlays("temp4", "alive", "meter")
-	//overlays |=
-/atom/proc/associate_with_overlays()
-	overlays |= args
-//add_overlays("temp4", "alive", "meter")
-	//overlays.Add;overlays +=
-/atom/proc/add_overlays()
-	return overlays.Add(args)
+		return "<img class='icon icon-misc' src='data:image/png;base64,[icon_base64]'>"
 
-//remove_overlays("temp4", "alive", "meter")
-	//
-/atom/proc/remove_overlays()
-	return overlays.Remove(args)
-//set_overlays(list("temp4", "alive", "meter"))
-	//overlays =
-/atom/proc/set_overlays(list/value)
-	overlays = value
+	// Either an atom or somebody fucked up and is gonna get a runtime, which I'm fine with.
+	var/atom/A = thing
+	var/key = "[istype(A.icon, /icon) ? "[REF(A.icon)]" : A.icon]:[A.icon_state]"
 
-// (placeholders for if/when TG overlays system is ported)
-/atom/proc/cut_overlays(Start=1, End=0)
-	return overlays.Cut(Start, End)
 
+	if (!bicon_cache[key]) // Doesn't exist, make it.
+		var/icon/I = icon(A.icon, A.icon_state, SOUTH, 1)
+		if (ishuman(thing)) // Shitty workaround for a BYOND issue.
+			var/icon/temp = I
+			I = icon()
+			I.Insert(temp, dir = SOUTH)
+
+		bicon_cache[key] = icon2base64(I)
+
+	return "<img class='icon icon-[A.icon_state]' src='data:image/png;base64,[bicon_cache[key]]'>"
+
+//Costlier version of icon2html() that uses getFlatIcon() to account for overlays, underlays, etc. Use with extreme moderation, ESPECIALLY on mobs.
+/proc/costly_icon2html(thing, target, sourceonly = FALSE)
+	if (!thing)
+		return
+
+	if (isicon(thing))
+		return icon2html(thing, target)
+
+	var/icon/I = getFlatIcon(thing)
+	return icon2html(I, target, sourceonly = sourceonly)

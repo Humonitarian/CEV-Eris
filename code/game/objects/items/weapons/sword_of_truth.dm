@@ -2,6 +2,7 @@
 	name = "Sword of Truth"
 	desc = "Sword made out of a unknown alloy, humming from an unknown power source."
 	icon = 'icons/obj/faction_item.dmi'
+	description_info = "Can be used to stun non-believers by using it in-hand"
 	icon_state = "nt_sword_truth"
 	item_state = "nt_sword_truth"
 	slot_flags = FALSE
@@ -163,5 +164,5 @@
 		else
 			visible_message(SPAN_WARNING("[user] failed to remove [sword] from the [src]"))
 
-/obj/structure/nt_pedestal/on_update_icon()
+/obj/structure/nt_pedestal/update_icon()
 	icon_state = "nt_pedestal[sword?"1":"0"]"

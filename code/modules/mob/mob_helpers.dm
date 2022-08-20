@@ -24,9 +24,9 @@
 	return istype(species, /datum/species/monkey)
 
 proc/isdeaf(A)
-	if(isliving(A))
-		var/mob/living/M = A
-		return (M.sdisabilities & DEAF) || M.ear_deaf
+//	if(isliving(A))
+//		var/mob/living/M = A
+//		return (M.sdisabilities & DEAF) || M.ear_deaf
 	return 0
 
 /proc/hasorgans(A) // Fucking really??
@@ -69,13 +69,13 @@ proc/isdeaf(A)
 
 //The base miss chance for the different defence zones
 var/list/global/base_miss_chance = list(
-	BP_HEAD = 45,
-	BP_CHEST = 10,
-	BP_GROIN = 20,
-	BP_L_LEG  = 20,
-	BP_R_LEG = 20,
-	BP_L_ARM = 20,
-	BP_R_ARM = 20
+	BP_HEAD = 5,
+	BP_CHEST = 2,
+	BP_GROIN = 2,
+	BP_L_LEG  = 3,
+	BP_R_LEG = 3,
+	BP_L_ARM = 3,
+	BP_R_ARM = 3
 	)
 
 //Used to weight organs when an organ is hit randomly (i.e. not a directed, aimed attack).
@@ -101,7 +101,6 @@ var/list/global/organ_rel_size = list(
 
 // Returns zone with a certain probability. If the probability fails, or no zone is specified, then a random body part is chosen.
 // Do not use this if someone is intentionally trying to hit a specific body part.
-// Use get_zone_with_miss_chance() for that.
 /proc/ran_zone(zone, probability)
 	if (zone)
 		zone = check_zone(zone)
@@ -121,33 +120,6 @@ var/list/global/organ_rel_size = list(
 		)
 
 	return ran_zone
-
-// Emulates targetting a specific body part, and miss chances
-// May return null if missed
-// miss_chance_mod may be negative.
-/proc/get_zone_with_miss_chance(zone, var/mob/target, var/miss_chance_mod = 0, var/ranged_attack=0)
-	zone = check_zone(zone)
-
-	if(!ranged_attack)
-		// you cannot miss if your target is prone or restrained
-		if(target.buckled || target.lying)
-			return zone
-		// if your target is being grabbed aggressively by someone you cannot miss either
-		for(var/obj/item/grab/G in target.grabbed_by)
-			if(G.state >= GRAB_AGGRESSIVE)
-				return zone
-
-	var/miss_chance = 10
-	if (zone in base_miss_chance)
-		miss_chance = base_miss_chance[zone]
-	miss_chance = max(miss_chance + miss_chance_mod, 0)
-	if(prob(miss_chance))
-		if(prob(70))
-			return null
-		return pick(base_miss_chance)
-	return zone
-
-
 
 //Replaces some of the characters with *, used in whispers. pr = probability of no star.
 //Will try to preserve HTML formatting. re_encode controls whether the returned text is HTML encoded outside tags.
@@ -659,3 +631,6 @@ proc/is_blind(A)
 	result[2] = ainvis
 
 	return result
+
+/mob/proc/set_faction(target_faction)
+	faction = target_faction ? target_faction : initial(faction)

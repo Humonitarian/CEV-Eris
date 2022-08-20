@@ -24,7 +24,7 @@
 			new_mob.key = key
 
 		The Login proc will handle making a new mob for that mobtype (including setting up stuff like mind.name). Simple!
-		However if you want that mind to have any special properties like being a traitor etc you will have to do that
+		However if you want that mind to have any special properties like being a contractor etc you will have to do that
 		yourself.
 
 */
@@ -220,7 +220,7 @@
 			if("unemag")
 				var/mob/living/silicon/robot/R = current
 				if (istype(R))
-					R.emagged = 0
+					R.RemoveTrait(CYBORG_TRAIT_EMAGGED)
 					if (R.activated(R.module.emag))
 						R.module_active = null
 					if(R.module_state_1 == R.module.emag)
@@ -238,7 +238,7 @@
 				if (isAI(current))
 					var/mob/living/silicon/ai/ai = current
 					for (var/mob/living/silicon/robot/R in ai.connected_robots)
-						R.emagged = 0
+						R.RemoveTrait(CYBORG_TRAIT_EMAGGED)
 						if (R.module)
 							if (R.activated(R.module.emag))
 								R.module_active = null

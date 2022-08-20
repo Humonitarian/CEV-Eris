@@ -21,19 +21,20 @@
 	reload_sound = 'sound/weapons/guns/interact/ltrifle_magin.ogg'
 	cocked_sound = 'sound/weapons/guns/interact/ltrifle_cock.ogg'
 	damage_multiplier = 1.2
-	recoil_buildup = 2
-	one_hand_penalty = 15 //automatic rifle level
+	init_recoil = RIFLE_RECOIL(0.9)
 
 	gun_tags = list(GUN_SILENCABLE)
 
 	init_firemodes = list(
 		FULL_AUTO_400,
-		SEMI_AUTO_NODELAY,
+		SEMI_AUTO_300,
 		BURST_3_ROUND
 		)
+	gun_parts = list(/obj/item/part/gun/frame/sts35 = 1, /obj/item/part/gun/grip/black = 1, /obj/item/part/gun/mechanism/autorifle = 1, /obj/item/part/gun/barrel/lrifle = 1)
+	serial_type = "OR"
 
 
-/obj/item/gun/projectile/automatic/sts35/on_update_icon()
+/obj/item/gun/projectile/automatic/sts35/update_icon()
 	..()
 
 	var/iconstring = initial(icon_state)
@@ -51,3 +52,12 @@
 /obj/item/gun/projectile/automatic/sts35/Initialize()
 	. = ..()
 	update_icon()
+
+/obj/item/part/gun/frame/sts35
+	name = "STS-35 frame"
+	desc = "An STS-35 frame. The finest in kraut space magic."
+	icon_state = "frame_orrifle"
+	result = /obj/item/gun/projectile/automatic/sts35
+	grip = /obj/item/part/gun/grip/black
+	mechanism = /obj/item/part/gun/mechanism/autorifle
+	barrel = /obj/item/part/gun/barrel/lrifle

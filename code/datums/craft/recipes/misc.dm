@@ -28,6 +28,15 @@
 	flags = CRAFT_ON_FLOOR|CRAFT_ONE_PER_TURF
 	related_stats = list(STAT_MEC)
 
+/datum/craft_recipe/plasticflaps
+	name = "plastic flaps"
+	result = /obj/structure/plasticflaps
+	steps = list(
+		list(CRAFT_MATERIAL, 4, MATERIAL_PLASTIC)
+	)
+	flags = CRAFT_ON_FLOOR|CRAFT_ONE_PER_TURF
+	related_stats = list(STAT_MEC)
+
 /datum/craft_recipe/metal_rod
 	name = "metal rod"
 	result = /obj/item/stack/rods
@@ -292,11 +301,10 @@
 	name = "Makeshift prosthetic right arm"
 	result = /obj/item/organ/external/robotic/makeshift/r_arm
 
-/datum/craft_recipe/guns_craft_frame
-	name = "Gun assembly"
-	result = /obj/item/craft_frame/guns
+/datum/craft_recipe/trash_bag
+	name = "trash bag"
+	result = /obj/item/storage/bag/trash
 	steps = list(
-		list(CRAFT_MATERIAL, 5, MATERIAL_PLASTEEL, "time" = 30),
-		list(QUALITY_WELDING, 10, 10)
+		list(CRAFT_MATERIAL,5, MATERIAL_PLASTIC), //Thick plastic bag
+		list(/obj/item/stack/cable_coil, 1, "time" = 20) //And the draw string
 	)
-	related_stats = list(STAT_MEC)

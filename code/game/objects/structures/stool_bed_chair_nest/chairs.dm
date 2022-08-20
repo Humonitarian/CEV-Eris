@@ -1,6 +1,7 @@
 /obj/structure/bed/chair	//YES, chairs are a type of bed, which are a type of stool. This works, believe me.	-Pete
 	name = "chair"
 	desc = "You sit in this. Either by will or force."
+	description_info = "Can be used as a support to climb up by looking up and clicking on a free tile that is not blocked by a railing"
 	icon_state = "chair_preview"
 	color = "#666666"
 	base_icon = "chair"
@@ -42,7 +43,7 @@
 /obj/structure/bed/chair/post_buckle_mob()
 	update_icon()
 
-/obj/structure/bed/chair/on_update_icon()
+/obj/structure/bed/chair/update_icon()
 	..()
 
 /*
@@ -52,7 +53,7 @@
 		I.color = material.icon_colour
 		I.layer = FLY_LAYER
 		stool_cache[cache_key] = I
-	associate_with_overlays(stool_cache[cache_key])
+	overlays |= stool_cache[cache_key]
 */
 	// Padding overlay.
 	if(padding_material)
@@ -62,7 +63,7 @@
 			I.color = padding_material.icon_colour
 			I.layer = FLY_LAYER
 			stool_cache[padding_cache_key] = I
-		associate_with_overlays(stool_cache[padding_cache_key])
+		overlays |= stool_cache[padding_cache_key]
 
 	if(buckled_mob && padding_material)
 		var/cache_key = "[base_icon]-armrest-[padding_material.name]"
@@ -71,7 +72,7 @@
 			I.layer = ABOVE_MOB_LAYER
 			I.color = padding_material.icon_colour
 			stool_cache[cache_key] = I
-		associate_with_overlays(stool_cache[cache_key])
+		overlays |= stool_cache[cache_key]
 
 /obj/structure/bed/chair/proc/update_layer()
 	if(src.dir == NORTH)
@@ -117,7 +118,7 @@
 
 // Leaving this in for the sake of compilation.
 /obj/structure/bed/chair/comfy
-	desc = "It's a chair. It looks comfy."
+	desc = "A chair. It looks comfy."
 	icon_state = "comfychair_preview"
 
 /obj/structure/bed/chair/comfy/brown/New(var/newloc,var/newmaterial)
@@ -151,7 +152,7 @@
 	anchored = FALSE
 	buckle_movable = 1
 
-/obj/structure/bed/chair/office/on_update_icon()
+/obj/structure/bed/chair/office/update_icon()
 	return
 
 /obj/structure/bed/chair/office/attackby(obj/item/W as obj, mob/user as mob)
@@ -213,7 +214,7 @@
 	..()
 	var/image/I = image(icon, "[icon_state]_over")
 	I.layer = FLY_LAYER
-	add_overlays(I)
+	overlays += I
 
 // Chair types
 
@@ -226,7 +227,7 @@
 	icon_state = "wooden_chair"
 	applies_material_colour = 0
 
-/obj/structure/bed/chair/wood/on_update_icon()
+/obj/structure/bed/chair/wood/update_icon()
 	return
 
 /obj/structure/bed/chair/wood/attackby(obj/item/W as obj, mob/user as mob)
@@ -238,7 +239,7 @@
 	..(newloc, MATERIAL_WOOD)
 	var/image/I = image(icon, "[icon_state]_over")
 	I.layer = FLY_LAYER
-	add_overlays(I)
+	overlays += I
 
 /obj/structure/bed/chair/wood/wings
 	icon_state = "wooden_chair_wings"
@@ -249,7 +250,7 @@
 /obj/structure/bed/chair/custom
 	applies_material_colour = 0
 
-/obj/structure/bed/chair/custom/on_update_icon()
+/obj/structure/bed/chair/custom/update_icon()
 	return
 
 /obj/structure/bed/chair/custom/attackby(obj/item/W as obj, mob/user as mob)
@@ -261,7 +262,7 @@
 	. = ..()
 	var/image/I = image(icon, "[icon_state]_over")
 	I.layer = FLY_LAYER
-	add_overlays(I)
+	overlays += I
 
 
 //wooden

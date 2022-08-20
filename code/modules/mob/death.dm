@@ -10,7 +10,7 @@
 	update_lying_buckled_and_verb_status()
 	GLOB.dead_mob_list -= src
 
-	if(do_gibs) gibs(loc, dna)
+	if(do_gibs) gibs(loc, src)
 
 	var/atom/movable/overlay/animation = null
 	if (anim)
@@ -18,7 +18,7 @@
 		animation.icon_state = "blank"
 		animation.icon = 'icons/mob/mob.dmi'
 		animation.master = src
-		FLICK(anim, animation)
+		flick(anim, animation)
 	addtimer(CALLBACK(src, .proc/check_delete, animation), 15)
 
 /mob/proc/check_delete(var/atom/movable/overlay/animation)
@@ -49,7 +49,7 @@
 		animation.icon_state = "blank"
 		animation.icon = iconfile
 		animation.master = src
-		FLICK(anim, animation)
+		flick(anim, animation)
 	addtimer(CALLBACK(src, .proc/check_delete, animation), 15)
 
 

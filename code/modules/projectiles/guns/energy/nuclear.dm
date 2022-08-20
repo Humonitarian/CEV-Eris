@@ -17,10 +17,13 @@
 
 	init_firemodes = list(
 		WEAPON_NORMAL,
-		BURST_2_ROUND
+		BURST_2_BEAM
 		)
+	init_recoil = HANDGUN_RECOIL(1)
 
+	serial_type = "ML"
 	var/lightfail = 0
+
 
 //override for failcheck behaviour
 /obj/item/gun/energy/nuclear/Process()
@@ -39,6 +42,6 @@
 		if("stun") overlays += "nucgun-stun"
 		if("lethal") overlays += "nucgun-kill"
 
-/obj/item/gun/energy/nuclear/on_update_icon()
+/obj/item/gun/energy/nuclear/update_icon()
 	cut_overlays()
 	update_mode()

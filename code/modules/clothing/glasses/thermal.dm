@@ -5,6 +5,7 @@
 	item_state = "glasses"
 	action_button_name = "Toggle Optical Matrix"
 	origin_tech = list(TECH_MAGNET = 3)
+	matter = list(MATERIAL_PLASTEEL = 3, MATERIAL_URANIUM = 3, MATERIAL_PLATINUM = 2)
 	vision_flags = SEE_MOBS
 	see_invisible = SEE_INVISIBLE_NOLIGHTING
 	flash_protection = FLASH_PROTECTION_REDUCED
@@ -19,11 +20,6 @@
 			to_chat(M, SPAN_DANGER("[src] overloads and blinds you!"))
 			M.eye_blind = 3
 			M.eye_blurry = 5
-			// Don't cure being nearsighted
-			if(!(M.disabilities & NEARSIGHTED))
-				M.disabilities |= NEARSIGHTED
-				spawn(100)
-					M.disabilities &= ~NEARSIGHTED
 	..()
 
 /obj/item/clothing/glasses/powered/thermal/Initialize()
@@ -39,7 +35,7 @@
 	I.gun_loc_tag = GUN_SCOPE
 	I.req_gun_tags = list(GUN_AMR, GUN_SCOPE)
 
-/obj/item/clothing/glasses/powered/thermal/syndi	//These are now a traitor item, concealed as mesons.	-Pete
+/obj/item/clothing/glasses/powered/thermal/syndi	//These are now a contractor item, concealed as mesons.	-Pete
 	name = "Optical Meson Scanner"
 	desc = "Used for seeing walls, floors, and stuff through anything."
 	icon_state = "meson"
@@ -52,6 +48,9 @@
 	desc = "Chinese thermals in the shape of goggles."
 	icon_state = "onestar_thermal"
 	off_state = "onestar_thermal"
+	darkness_view = 7
+	origin_tech = list(TECH_MAGNET = 6, TECH_COVERT = 2) //add replace with Tech_Onestar when thats done made -Valo
+	spawn_tags = SPAWN_TAG_ITEM_TECH_OS
 	spawn_blacklisted = TRUE
 
 /obj/item/clothing/glasses/powered/thermal/plain
@@ -66,6 +65,7 @@
 	flags = null //doesn't protect eyes because it's a monocle, duh
 
 	body_parts_covered = 0
+	style = STYLE_HIGH
 
 /obj/item/clothing/glasses/powered/thermal/plain/eyepatch
 	name = "Optical Thermal Eyepatch"
@@ -73,6 +73,7 @@
 	icon_state = "eyepatch"
 	item_state = "eyepatch"
 	body_parts_covered = 0
+	style = STYLE_HIGH
 
 /obj/item/clothing/glasses/powered/thermal/plain/jensen
 	name = "Optical Thermal Implants"

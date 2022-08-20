@@ -148,7 +148,7 @@
 				var/atom/A = host
 				if(istype(A))
 					affected_zlevels = GetConnectedZlevels(A.z)
-				crew_announcement.Announce(input, zlevels = affected_zlevels)
+				crew_announcement.Announce(input, zlevels = affected_zlevels, use_text_to_speech = TRUE)
 				announcment_cooldown = 1
 				spawn(600)//One minute cooldown
 					announcment_cooldown = 0
@@ -178,7 +178,7 @@
 						to_chat(usr, "<span class='warning'>Arrays recycling. Please stand by.</span>")
 						SSnano.update_uis(src)
 						return
-					if(!is_relay_online())//Contact Centcom has a check, Syndie doesn't to allow for Traitor funs.
+					if(!is_relay_online())//Contact Centcom has a check, Syndie doesn't to allow for Contractor funs.
 						to_chat(usr, "<span class='warning'>No Emergency Bluespace Relay detected. Unable to transmit message.</span>")
 						return 1
 

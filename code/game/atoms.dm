@@ -16,7 +16,7 @@
 	var/germ_level = GERM_LEVEL_AMBIENT // The higher the germ level, the more germ on the atom.
 	var/simulated = TRUE //filter for actions - used by lighting overlays
 	var/fluorescent // Shows up under a UV light.
-	var/allow_spin = TRUE
+	var/allow_spin = TRUE // prevents thrown atoms from spinning when disabled on thrown or target
 	var/used_now = FALSE //For tools system, check for it should forbid to work on atom for more than one user at time
 
 	///Chemistry.
@@ -42,37 +42,57 @@
 	var/list/atom_colours
 
 /atom/proc/update_icon()
-	return on_update_icon(arglist(args))
-
-/atom/proc/on_update_icon()
 	return
 
 /atom/New(loc, ...)
 	init_plane()
 	update_plane()
 	init_light()
-	var/do_initialize = SSatoms.init_state
-	if(do_initialize > INITIALIZATION_INSSATOMS)
+
+	var/do_initialize = SSatoms.initialized
+	if(do_initialize != INITIALIZATION_INSSATOMS)
 		args[1] = do_initialize == INITIALIZATION_INNEW_MAPLOAD
-		if(SSatoms.InitAtom(src, args))
+		if(SSatoms.InitAtom(src, FALSE, args))
 			//we were deleted
 			return
 
-	var/list/created = SSatoms.created_atoms
-	if(created)
-		created += src
-
-
-//Called after New if the map is being loaded. mapload = TRUE
-//Called from base of New if the map is not being loaded. mapload = FALSE
-//This base must be called or derivatives must set initialized to TRUE
-//must not sleep
-//Other parameters are passed from New (excluding loc), this does not happen if mapload is TRUE
-//Must return an Initialize hint. Defined in __DEFINES/subsystems.dm
-
+/**
+ * The primary method that objects are setup in SS13 with
+ *
+ * we don't use New as we have better control over when this is called and we can choose
+ * to delay calls or hook other logic in and so forth
+ *
+ * During roundstart map parsing, atoms are queued for intialization in the base atom/New(),
+ * After the map has loaded, then Initalize is called on all atoms one by one. NB: this
+ * is also true for loading map templates as well, so they don't Initalize until all objects
+ * in the map file are parsed and present in the world
+ *
+ * If you're creating an object at any point after SSInit has run then this proc will be
+ * immediately be called from New.
+ *
+ * mapload: This parameter is true if the atom being loaded is either being intialized during
+ * the Atom subsystem intialization, or if the atom is being loaded from the map template.
+ * If the item is being created at runtime any time after the Atom subsystem is intialized then
+ * it's false.
+ *
+ * You must always call the parent of this proc, otherwise failures will occur as the item
+ * will not be seen as initalized (this can lead to all sorts of strange behaviour, like
+ * the item being completely unclickable)
+ *
+ * You must not sleep in this proc, or any subprocs
+ *
+ * Any parameters from new are passed through (excluding loc), naturally if you're loading from a map
+ * there are no other arguments
+ *
+ * Must return an [initialization hint][INITIALIZE_HINT_NORMAL] or a runtime will occur.
+ *
+ * Note: the following functions don't call the base for optimization and must copypasta handling:
+ * * [/turf/proc/Initialize]
+ * * [/turf/open/space/proc/Initialize]
+ */
 /atom/proc/Initialize(mapload, ...)
 	if(initialized)
-		crash_with("Warning: [src]([type]) initialized multiple times!")
+		CRASH("Warning: [src]([type]) initialized multiple times!")
 	initialized = TRUE
 
 	if(light_power && light_range)
@@ -92,15 +112,37 @@
 
 	return INITIALIZE_HINT_NORMAL
 
-//called if Initialize returns INITIALIZE_HINT_LATELOAD
+/**
+ * Late Intialization, for code that should run after all atoms have run Intialization
+ *
+ * To have your LateIntialize proc be called, your atoms [Initalization][/atom/proc/Initialize]
+ *  proc must return the hint
+ * [INITIALIZE_HINT_LATELOAD] otherwise you will never be called.
+ *
+ * useful for doing things like finding other machines on GLOB.machines because you can guarantee
+ * that all atoms will actually exist in the "WORLD" at this time and that all their Intialization
+ * code has been run
+ */
 /atom/proc/LateInitialize()
-	return
+	set waitfor = FALSE
 
+/**
+ * Top level of the destroy chain for most atoms
+ *
+ * Cleans up the following:
+ * * Removes alternate apperances from huds that see them
+ * * qdels the reagent holder from atoms if it exists
+ * * clears the orbiters list
+ * * clears overlays and priority overlays
+ * * clears the light object
+ */
 /atom/Destroy()
-	QDEL_NULL(reagents)
+	if(reagents)
+		QDEL_NULL(reagents)
+
 	spawn()
 		update_openspace()
-	. = ..()
+	return ..()
 
 /atom/proc/reveal_blood()
 	return
@@ -297,6 +339,10 @@ its easier to just keep the beam vertical.
 
 	if(desc)
 		to_chat(user, desc)
+		var/pref = user.get_preference_value("SWITCHEXAMINE")
+		if(pref == GLOB.PREF_YES)
+			user.client.statpanel = "Examine"
+
 
 	if(reagents)
 		if(reagent_flags & TRANSPARENT)
@@ -375,8 +421,6 @@ its easier to just keep the beam vertical.
 	if(isnull(M.key)) return
 	if (ishuman(M))
 		var/mob/living/carbon/human/H = M
-		if (!istype(H.dna, /datum/dna))
-			return FALSE
 		if (H.gloves)
 			if(src.fingerprintslast != H.key)
 				src.fingerprintshidden += text("\[[time_stamp()]\] (Wearing gloves). Real name: [], Key: []", H.real_name, H.key)
@@ -394,10 +438,10 @@ its easier to just keep the beam vertical.
 	return
 
 /atom/proc/add_fingerprint(mob/living/M, ignoregloves = FALSE)
-	if(isnull(M)) return
-	if(isAI(M)) return
-	if(isnull(M.key)) return
-	if (ishuman(M))
+	if(isnull(M) || isnull(M.key) || isAI(M))
+		return
+
+	if(ishuman(M))
 		//Add the list if it does not exist.
 		if(!fingerprintshidden)
 			fingerprintshidden = list()
@@ -406,18 +450,15 @@ its easier to just keep the beam vertical.
 		add_fibers(M)
 
 		//He has no prints!
-		if (mFingerprints in M.mutations)
+		if(get_active_mutation(M, MUTATION_NOPRINTS))
 			if(fingerprintslast != M.key)
 				fingerprintshidden += "(Has no fingerprints) Real name: [M.real_name], Key: [M.key]"
 				fingerprintslast = M.key
 			return FALSE		//Now, lets get to the dirty work.
 		//First, make sure their DNA makes sense.
 		var/mob/living/carbon/human/H = M
-		if (!istype(H.dna, /datum/dna) || !H.dna.uni_identity || (length(H.dna.uni_identity) != 32))
-			if(!istype(H.dna, /datum/dna))
-				H.dna = new /datum/dna(null)
-				H.dna.real_name = H.real_name
-		H.check_dna()
+		if(!H.fingers_trace)
+			H.fingers_trace = md5(H.real_name)
 
 		//Now, deal with gloves.
 		if (H.gloves && H.gloves != src)
@@ -530,10 +571,8 @@ its easier to just keep the beam vertical.
 	was_bloodied = TRUE
 	blood_color = "#A10808"
 	if(istype(M))
-		if (!istype(M.dna, /datum/dna))
-			M.dna = new /datum/dna(null)
-			M.dna.real_name = M.real_name
-		M.check_dna()
+		if(!M.fingers_trace)
+			M.fingers_trace = md5(M.real_name)
 		if (M.species)
 			blood_color = M.species.blood_color
 	. = TRUE
@@ -636,6 +675,21 @@ its easier to just keep the beam vertical.
 	for(var/o in objs)
 		var/obj/O = o
 		O.show_message(message,2,deaf_message,1)
+
+/atom/movable/proc/dropInto(var/atom/destination)
+	while(istype(destination))
+		var/atom/drop_destination = destination.onDropInto(src)
+		if(!istype(drop_destination) || drop_destination == destination)
+			return forceMove(destination)
+		destination = drop_destination
+	return forceMove(null)
+
+/atom/proc/onDropInto(var/atom/movable/AM)
+	return // If onDropInto returns null, then dropInto will forceMove AM into us.
+
+/atom/movable/onDropInto(var/atom/movable/AM)
+	return loc // If onDropInto returns something, then dropInto will attempt to drop AM there.
+
 
 /atom/Entered(var/atom/movable/AM, var/atom/old_loc, var/special_event)
 	if(loc)

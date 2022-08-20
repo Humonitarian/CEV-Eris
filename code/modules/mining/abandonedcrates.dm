@@ -64,7 +64,7 @@
 			new/obj/item/rig(src)
 		if(61 to 62)
 			for(var/i = 0, i < 12, ++i)
-				new/obj/item/clothing/head/kitty(src)
+				new/obj/item/reagent_containers/food/snacks/pie(src)
 		if(63 to 64)
 			var/t = rand(4,7)
 			for(var/i = 0, i < t, ++i)
@@ -94,7 +94,7 @@
 		if(91)
 			new/obj/item/tool/sword/katana(src)
 		if(92)
-			new/obj/item/dnainjector/xraymut(src) // Probably the least OP
+			new/obj/item/tool/sword/katana(src)
 		if(93) // Why the hell not
 			new/obj/item/storage/backpack/clown(src)
 			new/obj/item/clothing/under/rank/clown(src)

@@ -3,6 +3,8 @@ GLOBAL_LIST_EMPTY(wedge_icon_cache)
 /obj/machinery/door/airlock
 	name = "Airlock"
 	icon = 'icons/obj/doors/Doorint.dmi'
+	description_info = "Can be forced to remain open by leaving in a decently sized tool such as a wrench or crowbar. Can also be deconstructed by cutting all wires other than the bolt wire, welding, and then trying to crowbar it with its panel open. The bolts can be forced upwards if the door is unpowered with a hammering tool"
+	description_antag = "Can have signalers attached to the wires. Letting you get alerts whenever someone uses a door"
 	icon_state = "door_closed"
 	power_channel = STATIC_ENVIRON
 
@@ -657,7 +659,7 @@ There are 9 wires.
 	else
 		underlays += GLOB.wedge_icon_cache[cache_string]
 
-/obj/machinery/door/airlock/on_update_icon()
+/obj/machinery/door/airlock/update_icon()
 	set_light(0)
 	if(overlays.len)
 		cut_overlays()
@@ -665,27 +667,27 @@ There are 9 wires.
 		underlays.Cut()
 	if(density)
 		if(locked && lights && arePowerSystemsOn())
-			SetIconState("door_locked")
+			icon_state = "door_locked"
 			set_light(1.5, 0.5, COLOR_RED_LIGHT)
 		else
-			SetIconState("door_closed")
+			icon_state = "door_closed"
 		if(p_open || welded)
-			set_overlays(list())
+			overlays = list()
 			if(p_open)
-				add_overlays(image(icon, "panel_open"))
+				overlays += image(icon, "panel_open")
 			if (!(stat & NOPOWER))
 				if(stat & BROKEN)
-					add_overlays(image(icon, "sparks_broken"))
+					overlays += image(icon, "sparks_broken")
 				else if (health < maxhealth * 3/4)
-					add_overlays(image(icon, "sparks_damaged"))
+					overlays += image(icon, "sparks_damaged")
 			if(welded)
-				add_overlays(image(icon, "welded"))
+				overlays += image(icon, "welded")
 		else if (health < maxhealth * 3/4 && !(stat & NOPOWER))
-			add_overlays(image(icon, "sparks_damaged"))
+			overlays += image(icon, "sparks_damaged")
 	else
-		SetIconState("door_open")
+		icon_state = "door_open"
 		if((stat & BROKEN) && !(stat & NOPOWER))
-			add_overlays(image(icon, "sparks_open"))
+			overlays += image(icon, "sparks_open")
 	if(wedged_item)
 		generate_wedge_overlay()
 
@@ -693,27 +695,29 @@ There are 9 wires.
 	switch(animation)
 		if("opening")
 			if(overlays.len)
-				cut_overlays()
+				overlays.Cut()
 			if(p_open)
-				flicker("o_door_opening")
+				flick("o_door_opening", src)  //can not use flick due to BYOND bug updating overlays right before flicking
+				update_icon()
 			else
-				flicker("door_opening")
-			update_icon()
+				flick("door_opening", src)//[stat ? "_stat":]
+				update_icon()
 		if("closing")
 			if(overlays.len)
-				cut_overlays()
+				overlays.Cut()
 			if(p_open)
-				flicker("o_door_closing")
+				flick("o_door_closing", src)
+				update_icon()
 			else
-				flicker("door_closing")
-			update_icon()
+				flick("door_closing", src)
+				update_icon()
 		if("spark")
 			if(density)
-				flicker("door_spark")
+				flick("door_spark", src)
 		if("deny")
-			if(density && arePowerSystemsOn())
-				flicker("door_deny")
-				playsound(loc, 'sound/machines/Custom_deny.ogg', 50, 1, -2)
+			if(density && src.arePowerSystemsOn())
+				flick("door_deny", src)
+				playsound(src.loc, 'sound/machines/Custom_deny.ogg', 50, 1, -2)
 	return
 
 /obj/machinery/door/airlock/attack_ai(mob/user as mob)
@@ -852,11 +856,10 @@ There are 9 wires.
 	return ..()
 
 /obj/machinery/door/airlock/attack_hand(mob/user as mob)
-	if(!issilicon(usr) && isElectrified() && shock(user, 100))
+	if(!issilicon(user) && isElectrified() && shock(user, 100))
 		return
 
-	// No. -- cib
-	/**
+	// Why did they comment this out this is comedy gold
 	if(ishuman(user) && prob(40) && density)
 		var/mob/living/carbon/human/H = user
 		if(H.getBrainLoss() >= 60)
@@ -864,14 +867,13 @@ There are 9 wires.
 			if(!istype(H.head, /obj/item/clothing/head/armor/helmet))
 				visible_message(SPAN_WARNING("[user] headbutts the airlock."))
 				var/obj/item/organ/external/affecting = H.get_organ(BP_HEAD)
-				H.Stun(8)
 				H.Weaken(5)
 				if(affecting.take_damage(10, 0))
 					H.UpdateDamageIcon()
 			else
 				visible_message(SPAN_WARNING("[user] headbutts the airlock. Good thing they're wearing a helmet."))
 			return
-	**/
+
 
 	if(user.a_intent == I_GRAB && wedged_item && !user.get_active_hand())
 		take_out_wedged_item(user)
@@ -972,7 +974,7 @@ There are 9 wires.
 		hit(user, I)
 		return
 
-	var/tool_type = I.get_tool_type(user, list(QUALITY_PRYING, QUALITY_SCREW_DRIVING, QUALITY_WELDING), src)
+	var/tool_type = I.get_tool_type(user, list(QUALITY_PRYING, QUALITY_SCREW_DRIVING, QUALITY_WELDING, p_open ? QUALITY_PULSING : null, p_open ? QUALITY_HAMMERING : null), src)
 	switch(tool_type)
 		if(QUALITY_PRYING)
 			if(!repairing)
@@ -1041,6 +1043,18 @@ There are 9 wires.
 			else
 				..()
 			return
+
+		if(QUALITY_HAMMERING)
+			if(stat & NOPOWER && locked)
+				to_chat(user, SPAN_NOTICE("You start hammering the bolts into the unlocked position"))
+				// long time and high chance to fail.
+				if(I.use_tool(user, src, WORKTIME_LONG, tool_type, FAILCHANCE_VERY_HARD, required_stat = STAT_MEC))
+					to_chat(user, SPAN_NOTICE("You unbolt the door."))
+					locked = FALSE
+			else
+				to_chat(user, SPAN_NOTICE("You can\'t hammer away the bolts if the door is powered or not bolted."))
+				return
+
 
 		if(ABORT_CHECK)
 			return

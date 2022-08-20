@@ -3,7 +3,8 @@
 	title = "Guild Merchant"
 	flag = MERCHANT
 	department = DEPARTMENT_GUILD
-	head_position = 1
+	head_position = TRUE
+	aster_guild_member = TRUE
 	department_flag = GUILD | COMMAND
 	faction = "CEV Eris"
 	total_positions = 1
@@ -50,6 +51,7 @@ Your second loyalty is to the guild. Ensure it retains good relations with priva
 
 	software_on_spawn = list(///datum/computer_file/program/supply,
 							 ///datum/computer_file/program/deck_management,
+							 /datum/computer_file/program/trade,
 							 /datum/computer_file/program/scanner,
 							 /datum/computer_file/program/wordprocessor,
 							 /datum/computer_file/program/reports)

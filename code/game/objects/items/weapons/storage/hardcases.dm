@@ -50,11 +50,11 @@
 	sticker = options[choice]
 	update_icon()
 
-/obj/item/storage/hcases/on_update_icon()
+/obj/item/storage/hcases/update_icon()
 	icon_state = "[initial(icon_state)][closed ? "" : "_open"]"
 	cut_overlays()
 	if(sticker)
-		add_overlays("[sticker][closed ? "" : "_open"]")
+		overlays += "[sticker][closed ? "" : "_open"]"
 
 /obj/item/storage/hcases/open(mob/user)
 	if(closed)
@@ -188,7 +188,6 @@ obj/item/storage/hcases/attackby(obj/item/W, mob/user)
 
 	can_hold = list(
 		/obj/item/device/scanner/health,
-		/obj/item/dnainjector,
 		/obj/item/reagent_containers/dropper,
 		/obj/item/reagent_containers/glass/beaker,
 		/obj/item/reagent_containers/glass/bottle,

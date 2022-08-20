@@ -37,8 +37,8 @@
 	set_light(2, 3, illumination_color)
 
 
-/obj/machinery/hivemind_machine/on_update_icon()
-	cut_overlays()
+/obj/machinery/hivemind_machine/update_icon()
+	overlays.Cut()
 	if(stat & EMPED)
 		icon_state = "[icon_state]-disabled"
 	else
@@ -52,15 +52,15 @@
 	else if (health < max_health * 0.25)
 		to_chat(user, SPAN_DANGER("It's seriously fucked up!"))
 	else if (health < max_health * 0.50)
-		to_chat(user, SPAN_DANGER("It's very damaged, you can almost see the components inside!"))
+		to_chat(user, SPAN_DANGER("It's very damaged; you can almost see the components inside!"))
 	else if (health < max_health * 0.75)
 		to_chat(user, SPAN_WARNING("It has numerous dents and deep scratches."))
 	else if (health < max_health)
-		to_chat(user, SPAN_WARNING("It's a bit scratched and has dents."))
+		to_chat(user, SPAN_WARNING("It's a bit scratched and dented."))
 
 
 /obj/machinery/hivemind_machine/Process()
-	if(wireweeds_required && !locate(/obj/effect/plant/hivemind) in loc)
+	if(!hive_mind_ai || (wireweeds_required && !locate(/obj/effect/plant/hivemind) in loc))
 		take_damage(5, on_damage_react = FALSE)
 
 	if(SDP)
@@ -258,6 +258,15 @@
 		Proj.on_hit(loc)
 	. = ..()
 
+/obj/machinery/hivemind_machine/attack_generic(mob/M, damage, attack_message)
+	if(damage)
+		M.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		M.do_attack_animation(src)
+		M.visible_message(SPAN_DANGER("\The [M] [attack_message] \the [src]!"))
+		playsound(loc, 'sound/effects/attackblob.ogg', 50, 1)
+		take_damage(damage)
+	else
+		attack_hand(M)
 
 /obj/machinery/hivemind_machine/attackby(obj/item/I, mob/user)
 	if(!(I.flags & NOBLUDGEON) && I.force)
@@ -277,7 +286,7 @@
 		var/obj/item/device/flash/flash = I
 		if(!flash.broken)
 			playsound(user, 'sound/weapons/flash.ogg', 100, 1)
-			FLICK("flash2", flash)
+			flick("flash2", flash)
 			flash.times_used++
 			flash.flash_recharge()
 			damage_reaction()
@@ -292,6 +301,8 @@
 			take_damage(30)
 		if(3)
 			take_damage(10)
+		if(4)
+			take_damage(5)
 
 
 /obj/machinery/hivemind_machine/emp_act(severity)
@@ -302,6 +313,9 @@
 		if(2)
 			take_damage(30)
 			stun(8)
+		if(3)
+			take_damage(15)
+			stun(3)
 	..()
 
 
@@ -328,22 +342,21 @@
 	var/list/reward_item = list(
 		/obj/item/tool/weldingtool/hivemind,
 		/obj/item/tool/crowbar/pneumatic/hivemind,
-		/obj/item/reagent_containers/glass/beaker/hivemind,
+		/obj/item/reagent_containers/glass/beaker/hivemind)
+	var/list/reward_oddity = list(
 		/obj/item/oddity/hivemind/old_radio,
-		/obj/item/oddity/hivemind/old_pda
-		)
+		/obj/item/oddity/hivemind/old_pda)
 
 
-/obj/machinery/hivemind_machine/node/Initialize()
+/obj/machinery/hivemind_machine/node/New(loc, _name, _surname)
 	if(!hive_mind_ai)
-		hive_mind_ai = new /datum/hivemind
+		hive_mind_ai = new /datum/hivemind(_name, _surname)
 	..()
 
 	hive_mind_ai.hives.Add(src)
 	hive_mind_ai.level_up()
 
 	update_icon()
-
 
 	var/obj/effect/plant/hivemind/founded_wire = locate() in loc
 	if(!founded_wire)
@@ -365,19 +378,17 @@
 	SDP.set_master(src)
 
 /obj/machinery/hivemind_machine/node/proc/gift()
-	if(prob(10))
-		state("leaves behind an item!")
-		var/gift = pick(reward_item)
-		new gift(get_turf(loc))
+	var/gift = prob(GLOB.hive_data_float["core_oddity_drop_chance"]) ? pick(reward_oddity) : pick(reward_item)
+	new gift(get_turf(loc))
+	state("leaves behind an item!")
 
 /obj/machinery/hivemind_machine/node/proc/core()
 	state("leaves behind a weird looking datapad!")
-	var/core = /obj/item/oddity/hivemind/hive_core
-	new core(get_turf(loc))
+	new /obj/item/oddity/hivemind/hive_core(get_turf(loc))
 
 /obj/machinery/hivemind_machine/node/Destroy()
 	gift()
-	hive_mind_ai.hives.Remove(src)
+	hive_mind_ai?.hives.Remove(src)
 	check_for_other()
 	if(hive_mind_ai == null)
 		core()
@@ -405,14 +416,14 @@
 		add_wireweed(wireweed)
 
 
-/obj/machinery/hivemind_machine/node/on_update_icon()
-	cut_overlays()
+/obj/machinery/hivemind_machine/node/update_icon()
+	overlays.Cut()
 	if(stat & EMPED)
 		icon_state = "core-disabled"
-		add_overlays("core-smirk_disabled")
+		overlays += "core-smirk_disabled"
 	else
 		icon_state = initial(icon_state)
-		add_overlays("core-smirk")
+		overlays += "core-smirk"
 
 
 /obj/machinery/hivemind_machine/node/use_ability(atom/target)
@@ -438,12 +449,8 @@
 //There we check for other nodes
 //If no any other hives will be found, it's game over
 /obj/machinery/hivemind_machine/node/proc/check_for_other()
-	if(hive_mind_ai)
-		if(!hive_mind_ai.hives.len)
-			hive_mind_ai.die()
-
-
-
+	if(hive_mind_ai && !hive_mind_ai.hives.len)
+		hive_mind_ai.die()
 
 //TURRET
 //shooting the target with toxic goo
@@ -519,13 +526,17 @@
 
 
 /obj/machinery/hivemind_machine/mob_spawner/use_ability()
-	var/obj/randomcatcher/CATCH = new /obj/randomcatcher(src)
-	var/mob/living/simple_animal/hostile/hivemind/spawned_mob = CATCH.get_item(mob_to_spawn)
-	spawned_mob.loc = loc
-	spawned_creatures.Add(spawned_mob)
-	spawned_mob.master = src
-	FLICK("[icon_state]-anim", src)
-	qdel(CATCH)
+	var/total_mobs = 0
+	for(var/i in GLOB.hivemind_mobs)
+		total_mobs += GLOB.hivemind_mobs[i]
+	if(!GLOB.hive_data_bool["maximum_existing_mobs"] || GLOB.hive_data_float["maximum_existing_mobs"] > total_mobs)
+		var/obj/randomcatcher/CATCH = new /obj/randomcatcher(src)
+		var/mob/living/simple_animal/hostile/hivemind/spawned_mob = CATCH.get_item(mob_to_spawn)
+		spawned_mob.loc = loc
+		spawned_creatures.Add(spawned_mob)
+		spawned_mob.master = src
+		flick("[icon_state]-anim", src)
+		qdel(CATCH)
 
 
 
@@ -556,7 +567,7 @@
 
 //this one is slow, careful with it
 /obj/machinery/hivemind_machine/babbler/use_ability()
-	FLICK("[icon_state]-anim", src)
+	flick("[icon_state]-anim", src)
 	var/msg_cycles = rand(1, 2)
 	var/msg = ""
 	for(var/i = 1 to msg_cycles)
@@ -625,7 +636,7 @@
 					continue
 			use_ability(target)
 	if(can_scream)
-		FLICK("[icon_state]-anim", src)
+		flick("[icon_state]-anim", src)
 		playsound(src, 'sound/hallucinations/veryfar_noise.ogg', 85, 1)
 		set_cooldown()
 
@@ -719,7 +730,7 @@
 			to_chat(H, SPAN_NOTICE("Reality flickers for a second, but you manage to focus!"))
 	else if (istype(target))
 		target.adjust_hallucination(20, 20)
-	FLICK("[icon_state]-anim", src)
+	flick("[icon_state]-anim", src)
 
 
 

@@ -46,11 +46,13 @@
 	icon_state = "gun_part_1"
 	spawn_tags = SPAWN_TAG_GUN_PART
 	w_class = ITEM_SIZE_SMALL
-	matter = list(MATERIAL_PLASTEEL = 1.2)
+	matter = list(MATERIAL_PLASTEEL = 5)
+	var/generic = TRUE
 
 /obj/item/part/gun/Initialize()
 	. = ..()
-	icon_state = "gun_part_[rand(1,6)]"
+	if(generic)
+		icon_state = "gun_part_[rand(1,6)]"
 
 /obj/item/part/gun/artwork
 	desc = "This is an artistically-made gun part."
@@ -79,7 +81,7 @@
 	var/suitable_part
 	var/view_only = 0
 	var/tags_to_spawn = list()
-	var/req_parts = 10
+	var/req_parts = 5
 	var/complete = FALSE
 	var/total_items = 20
 	var/list/items = list()
@@ -120,7 +122,7 @@
 
 /obj/item/craft_frame/proc/generate_guns()
 	for(var/i in 1 to total_items)
-		var/list/canidates = SSspawn_data.valid_candidates(tags_to_spawn, null, FALSE, i*100, i*500, TRUE, null, paths, null)
+		var/list/canidates = SSspawn_data.valid_candidates(tags_to_spawn, null, FALSE, i*300, i*500, TRUE, null, paths, null)
 		paths += list(SSspawn_data.pick_spawn(canidates))
 	for(var/path in paths)
 		items += new path()
@@ -142,6 +144,11 @@
 
 /obj/item/craft_frame/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui, force_open = NANOUI_FOCUS)
 	var/list/data = list()
+
+	var/datum/asset/craftIcons = get_asset_datum(/datum/asset/simple/craft)
+	var/datum/asset/materialIcons = get_asset_datum(/datum/asset/simple/materials)
+	if (craftIcons.send(user.client) || materialIcons.send(user.client))
+		user.client.browse_queue_flush() // stall loading nanoui until assets actualy gets sent
 
 	var/list/listed_products = list()
 	for(var/key = 1 to view_only)

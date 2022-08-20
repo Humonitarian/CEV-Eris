@@ -1,7 +1,9 @@
 /obj/item/tool/multitool/hacktool
-	spawn_blacklisted = TRUE//traitor item
+	spawn_blacklisted = TRUE//contractor item
 	var/is_hacking = 0
 	var/max_known_targets
+
+	description_antag = "Use a screwdriver to activate. Its hacking time is 30 seconds, but gets sped the more skilled you are with computers"
 
 	var/in_hack_mode = 0
 	var/list/known_targets

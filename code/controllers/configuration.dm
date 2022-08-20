@@ -36,7 +36,7 @@ GLOBAL_LIST_EMPTY(storyteller_cache)
 	//var/enable_authentication = 0		// goon authentication
 	var/del_new_on_log = 1				// del's new players if they log before they spawn in
 	var/objectives_disabled = 0 			//if objectives are disabled or not
-	var/protect_roles_from_antagonist = 0// If security and such can be traitor/cult/other
+	var/protect_roles_from_antagonist = 0// If security and such can be contractor/cult/other
 	var/allow_Metadata = 0				// Metadata is supported.
 	var/popup_admin_pm = 0				//adminPMs to non-admins show in a pop-up 'reply' window when set to 1.
 	var/tick_limit_mc_init = TICK_LIMIT_MC_INIT_DEFAULT	//SSinitialization throttling
@@ -222,6 +222,10 @@ GLOBAL_LIST_EMPTY(storyteller_cache)
 
 	var/webhook_url
 	var/webhook_key
+
+	var/tts_bearer // Token we use to talk with text-to-speech service
+	var/tts_enabled // Global switch
+	var/tts_cache // Store generated tts files and reuse them, instead of always requesting new
 
 	var/static/regex/ic_filter_regex //For the cringe filter.
 
@@ -722,6 +726,14 @@ GLOBAL_LIST_EMPTY(storyteller_cache)
 				if("webhook_url")
 					config.webhook_url = value
 
+				if("tts_bearer")
+					config.tts_bearer = value
+
+				if("tts_enabled")
+					config.tts_enabled = config.tts_bearer ? value : FALSE
+
+				if("tts_cache")
+					config.tts_cache = value
 
 				if("random_start")
 					var/list/startlist = list(

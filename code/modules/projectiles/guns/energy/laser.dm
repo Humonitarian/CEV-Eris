@@ -21,6 +21,8 @@
 		WEAPON_CHARGE
 	)
 	twohanded = TRUE
+	init_recoil = CARBINE_RECOIL(1)
+	serial_type = "NT"
 
 /obj/item/gun/energy/laser/mounted
 	self_recharge = TRUE
@@ -60,6 +62,7 @@
 	fire_sound = 'sound/weapons/Laser.ogg'
 	slot_flags = SLOT_BELT|SLOT_BACK
 	w_class = ITEM_SIZE_NORMAL
+	force = WEAPON_FORCE_PAINFUL
 	can_dual = TRUE
 	matter = list(MATERIAL_STEEL = 10, MATERIAL_PLASTIC = 15, MATERIAL_GLASS = 5)
 	projectile_type = /obj/item/projectile/beam
@@ -70,11 +73,13 @@
 	price_tag = 750
 	init_firemodes = list(
 		WEAPON_NORMAL,
-		BURST_2_ROUND
+		BURST_2_BEAM
 	)
 	twohanded = TRUE
 	saw_off = TRUE
 	sawn = /obj/item/gun/energy/retro/sawn
+	init_recoil = CARBINE_RECOIL(1)
+	serial_type = "OS"
 
 /obj/item/gun/energy/retro/sawn
 	name = "sawn down OS LG \"Cog\""
@@ -95,6 +100,7 @@
 	twohanded = FALSE
 	saw_off = FALSE
 	spawn_blacklisted = TRUE
+	init_recoil = SMG_RECOIL(1)
 
 /obj/item/gun/energy/captain
 	name = "NT LG \"Destiny\""
@@ -121,6 +127,8 @@
 	)
 	twohanded = FALSE
 	spawn_blacklisted = TRUE//antag_item_targets
+	init_recoil = HANDGUN_RECOIL(1)
+	serial_type = "NT"
 
 /obj/item/gun/energy/lasercannon
 	name = "Prototype: laser cannon"
@@ -135,6 +143,7 @@
 	slot_flags = SLOT_BELT|SLOT_BACK
 	projectile_type = /obj/item/projectile/beam/heavylaser
 	charge_cost = 100
+	serial_type = "ML"
 	fire_delay = 20
 	zoom_factor = 0
 	damage_multiplier = 1
@@ -144,6 +153,7 @@
 		WEAPON_NORMAL
 		)
 	twohanded = TRUE
+	init_recoil = LMG_RECOIL(1)
 
 /obj/item/gun/energy/lasercannon/mounted
 	name = "mounted laser cannon"
@@ -165,19 +175,19 @@
 	projectile_type = /obj/item/projectile/beam/psychic
 	icon_contained = TRUE
 	spawn_blacklisted = TRUE
-	var/traitor = FALSE //Check if it's a traitor psychic weapon
+	var/contractor = FALSE //Check if it's a contractor psychic weapon
 	var/datum/mind/owner
 	var/list/victims = list()
 	var/datum/antag_contract/derail/contract
-	pierce_multiplier = 2
+	pierce_multiplier = 4
 
 /obj/item/gun/energy/psychic/Initialize()
 	..()
-	if(traitor)
+	if(contractor)
 		START_PROCESSING(SSobj, src)
 
 /obj/item/gun/energy/psychic/Destroy()
-	if(traitor)
+	if(contractor)
 		STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -229,6 +239,7 @@
 /obj/item/gun/energy/psychic/lasercannon
 	name = "Prototype: psychic laser cannon"
 	desc = "A laser cannon that attacks the minds of people, causing sanity loss and inducing mental breakdowns."
+	description_antag = "Can pierce a wall"
 	icon = 'icons/obj/guns/energy/psychiccannon.dmi'
 	icon_state = "psychic_lasercannon"
 	item_state = "psychic_lasercannon"
@@ -239,8 +250,9 @@
 	w_class = ITEM_SIZE_NORMAL
 	force = WEAPON_FORCE_NORMAL
 	slot_flags = SLOT_BELT|SLOT_BACK
-	traitor = TRUE
-	pierce_multiplier = 2
+	contractor = TRUE
+	serial_type = "ML"
+	pierce_multiplier = 4
 	zoom_factor = 0
 	damage_multiplier = 1
 	charge_cost = 50
@@ -252,6 +264,7 @@
 		WEAPON_CHARGE
 		)
 	twohanded = FALSE
+	init_recoil = LMG_RECOIL(1)
 
 /obj/item/gun/energy/psychic/mindflayer
 	name = "Prototype: mind flayer"
@@ -265,6 +278,7 @@
 	price_tag = 2200
 	matter = list(MATERIAL_PLASTEEL = 15, MATERIAL_SILVER = 5, MATERIAL_PLASMA = 3)
 	twohanded = FALSE
+	init_recoil = HANDGUN_RECOIL(1)
 
 /obj/item/gun/energy/laser/makeshift
 	name = "makeshift laser carbine"
@@ -285,4 +299,5 @@
 	init_firemodes = list(
 		WEAPON_NORMAL
 	)
-	spawn_blacklisted = TRUE
+	spawn_tags = SPAWN_TAG_GUN_HANDMADE
+	init_recoil = CARBINE_RECOIL(1)

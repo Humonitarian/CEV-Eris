@@ -130,7 +130,7 @@
 		plant_controller.product_descs["[seed.uid]"] = desc
 	desc += ". Delicious! Probably."
 
-/obj/item/reagent_containers/food/snacks/grown/on_update_icon()
+/obj/item/reagent_containers/food/snacks/grown/update_icon()
 	if(!seed || !plant_controller || !plant_controller.plant_icon_cache)
 		return
 	cut_overlays()
@@ -148,7 +148,7 @@
 			fruit_leaves.color = "[seed.get_trait(TRAIT_PLANT_COLOUR)]"
 			plant_icon.overlays |= (fruit_leaves)
 		plant_controller.plant_icon_cache[icon_key] = plant_icon
-	associate_with_overlays(plant_icon)
+	overlays |= plant_icon
 
 /obj/item/reagent_containers/food/snacks/grown/Crossed(var/mob/living/M)
 	if(seed && seed.get_trait(TRAIT_JUICY) == 2)
@@ -291,10 +291,11 @@
 		return
 
 	if(seed.get_trait(TRAIT_SPREAD) > 0)
-		to_chat(user, SPAN_NOTICE("You plant the [src.name]."))
-		new /obj/machinery/portable_atmospherics/hydroponics/soil/invisible(get_turf(user),src.seed)
-		qdel(src)
-		return
+		var/turf/current_turf = get_turf(user)
+		if(!locate(/obj/machinery/portable_atmospherics/hydroponics/soil/invisible) in current_turf.contents)	// Prevents infinite plant stacking
+			to_chat(user, SPAN_NOTICE("You plant the [src]."))
+			new /obj/machinery/portable_atmospherics/hydroponics/soil/invisible(current_turf, seed)
+			qdel(src)
 
 /obj/item/reagent_containers/food/snacks/grown/pre_pickup(mob/user)
 	if(!seed)
@@ -342,9 +343,9 @@ var/list/fruit_icon_cache = list()
 		var/image/I = image(icon,"fruit_rind")
 		I.color = rind_colour
 		fruit_icon_cache["rind-[rind_colour]"] = I
-	associate_with_overlays(fruit_icon_cache["rind-[rind_colour]"])
+	overlays |= fruit_icon_cache["rind-[rind_colour]"]
 	if(!fruit_icon_cache["slice-[rind_colour]"])
 		var/image/I = image(icon,"fruit_slice")
 		I.color = flesh_colour
 		fruit_icon_cache["slice-[rind_colour]"] = I
-	associate_with_overlays(fruit_icon_cache["slice-[rind_colour]"])
+	overlays |= fruit_icon_cache["slice-[rind_colour]"]

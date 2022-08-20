@@ -1,6 +1,8 @@
 /obj/item/implant/death_alarm
 	name = "death alarm implant"
 	desc = "An alarm which monitors host vital signs and transmits a radio message upon death."
+	icon_state = "implant_deathalarm"
+	implant_overlay = "implantstorage_deathalarm"
 	var/mobname = "Will Robinson"
 	origin_tech = list(TECH_BLUESPACE=1, TECH_MAGNET=2, TECH_DATA=4, TECH_BIO=3)
 
@@ -33,17 +35,17 @@
 	switch (cause)
 		if("death")
 			var/obj/item/device/radio/headset/a = new /obj/item/device/radio/headset(null)
-			a.autosay("[mobname] has died in [t.name]!", "[mobname]'s Death Alarm")
+			a.autosay("[mobname] has died in [t.name]!", "[mobname]'s Death Alarm", use_text_to_speech = TRUE)
 			qdel(a)
 			STOP_PROCESSING(SSobj, src)
 		if ("emp")
 			var/obj/item/device/radio/headset/a = new /obj/item/device/radio/headset(null)
 			var/name = prob(50) ? t.name : pick(SSmapping.teleportlocs)
-			a.autosay("[mobname] has died in [name]!", "[mobname]'s Death Alarm")
+			a.autosay("[mobname] has died in [name]!", "[mobname]'s Death Alarm", use_text_to_speech = TRUE)
 			qdel(a)
 		else
 			var/obj/item/device/radio/headset/a = new /obj/item/device/radio/headset(null)
-			a.autosay("[mobname] has died-zzzzt in-in-in...", "[mobname]'s Death Alarm")
+			a.autosay("[mobname] has died-zzzzt in-in-in...", "[mobname]'s Death Alarm", use_text_to_speech = TRUE)
 			qdel(a)
 			STOP_PROCESSING(SSobj, src)
 

@@ -5,6 +5,7 @@
 	icon_state = "delivery"
 	item_state = "flashbang"
 	origin_tech = list(TECH_MATERIAL = 3, TECH_MAGNET = 4)
+	matter = list(MATERIAL_STEEL = 3, MATERIAL_PLASMA = 3, MATERIAL_DIAMOND = 1)
 	var/banglet = 0
 	var/spawner_type = null // must be an object path
 	var/deliveryamt = 1 // amount of type to deliver
@@ -18,7 +19,7 @@
 		for(var/mob/living/carbon/human/M in viewers(T, null))
 			if(M.eyecheck() < FLASH_PROTECTION_MODERATE)
 				if (M.HUDtech.Find("flash"))
-					FLICK("e_flash", M.HUDtech["flash"])
+					flick("e_flash", M.HUDtech["flash"])
 
 		for(var/i=1, i<=deliveryamt, i++)
 			var/atom/movable/x = new spawner_type

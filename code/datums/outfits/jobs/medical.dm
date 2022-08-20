@@ -21,6 +21,7 @@
 	id_type = /obj/item/card/id/cmo
 	pda_type = /obj/item/modular_computer/pda/heads/cmo
 	belt = /obj/item/storage/belt/medical/
+	backpack_contents = list(/obj/item/gun/projectile/selfload/moebius = 1, /obj/item/ammo_magazine/pistol/rubber = 2)
 
 /decl/hierarchy/outfit/job/medical/doctor
 	name = OUTFIT_JOB_NAME("Moebius Doctor")
@@ -52,9 +53,11 @@
 
 /decl/hierarchy/outfit/job/medical/paramedic
 	name = OUTFIT_JOB_NAME("Moebius Paramedic")
+	head = /obj/item/clothing/head/armor/faceshield/paramedic
 	uniform = /obj/item/clothing/under/rank/paramedic
-	suit = /obj/item/clothing/suit/storage/hazardvest/black
+	suit = /obj/item/clothing/suit/armor/paramedic
 	shoes = /obj/item/clothing/shoes/jackboots
 	l_hand = /obj/item/storage/firstaid/adv
 	belt = /obj/item/storage/belt/medical/emt
+	backpack_contents = list(/obj/item/gun/projectile/selfload/moebius = 1, /obj/item/ammo_magazine/pistol/rubber = 1, /obj/item/modular_computer/tablet/moebius/preset = 1)
 	flags = OUTFIT_HAS_BACKPACK|OUTFIT_EXTENDED_SURVIVAL

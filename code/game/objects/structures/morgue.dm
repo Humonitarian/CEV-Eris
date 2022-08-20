@@ -32,7 +32,7 @@
 		connected = null
 	return ..()
 
-/obj/structure/morgue/on_update_icon()
+/obj/structure/morgue/update_icon()
 	if (open)
 		icon_state = "morgue0"
 	else
@@ -147,11 +147,11 @@
 		if (M.get_respawn_bonus("CORPSE_HANDLING"))
 			return // we got this one already
 		//We send a message to the occupant's current mob - probably a ghost, but who knows.
-		to_chat(M, SPAN_NOTICE("Your remains have been collected and properly stored. Your crew respawn time is reduced by 10 minutes."))
+		to_chat(M, SPAN_NOTICE("Your remains have been collected and properly stored. Your crew respawn time is reduced by [(MORGUE_RESPAWN_BONUS)/600] minutes."))
 		
 		M << 'sound/effects/magic/blind.ogg' //Play this sound to a player whenever their respawn time gets reduced
 
-		M.set_respawn_bonus("CORPSE_HANDLING", 10 MINUTES)
+		M.set_respawn_bonus("CORPSE_HANDLING", MORGUE_RESPAWN_BONUS)
 		to_chat(user, SPAN_NOTICE("The corpse's spirit feels soothed and pleased."))
 
 
@@ -523,7 +523,7 @@
 	req_access = list(access_crematorium)
 	id = 1
 
-/obj/machinery/button/crematorium/on_update_icon()
+/obj/machinery/button/crematorium/update_icon()
 	return
 
 /obj/machinery/button/crematorium/attack_hand(mob/user as mob)

@@ -40,7 +40,7 @@
 		if (t)
 			src.name = "body bag - "
 			src.name += t
-			src.add_overlays(image(src.icon, "bodybag_label"))
+			src.overlays += image(src.icon, "bodybag_label")
 		else
 			src.name = "body bag"
 	//..() //Doesn't need to run the parent. Since when can fucking bodybags be welded shut? -Agouri
@@ -48,7 +48,7 @@
 	else if(istype(W, /obj/item/tool/wirecutters))
 		to_chat(user, "You cut the tag off the bodybag.")
 		src.name = "body bag"
-		src.cut_overlays()
+		src.overlays.Cut()
 		return
 
 /obj/structure/closet/body_bag/store_mobs(var/stored_units)
@@ -73,7 +73,7 @@
 			qdel(src)
 		return
 
-/obj/structure/closet/body_bag/on_update_icon()
+/obj/structure/closet/body_bag/update_icon()
     if(opened)
         icon_state = "bodybag_open"
     else
@@ -103,6 +103,7 @@
 	name = "stasis bag"
 	desc = "A folded, non-reusable bag designed to prevent additional damage to an occupant. Especially useful if short on time or in \
 	a hostile enviroment."
+	description_info = "You can scan the patient inside by clicking the bag with an health analyzer"
 	icon = 'icons/obj/cryobag.dmi'
 	icon_state = "bodybag_folded"
 	origin_tech = list(TECH_BIO = 4)
@@ -169,8 +170,5 @@
 		for(var/mob/living/L in contents)
 			L.examine(user)
 
-/obj/structure/closet/body_bag/cryobag/attackby(obj/item/W, mob/user)
-	if(opened)
-		..()
-	else //Allows the bag to respond to a health analyzer by analyzing the mob inside without needing to open it.
-		..()
+/obj/structure/closet/body_bag/attackby(obj/item/W, mob/user)
+	..() // Allows to use health analyzer on the mob inside

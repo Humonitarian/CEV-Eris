@@ -12,7 +12,6 @@
 	origin_tech = list(TECH_COMBAT = 2, TECH_MATERIAL = 2)
 	w_class = ITEM_SIZE_NORMAL
 	matter = list(MATERIAL_STEEL = 1)
-	recoil_buildup = 1
 	bad_type = /obj/item/gun/projectile
 	spawn_tags = SPAWN_TAG_GUN_PROJECTILE
 
@@ -167,6 +166,7 @@
 					to_chat(user, SPAN_WARNING("[AM] won't fit into the magwell.")) //wrong magazine
 					return
 				user.remove_from_mob(AM)
+				. = 1
 				AM.loc = src
 				ammo_magazine = AM
 
@@ -193,6 +193,7 @@
 					user.visible_message("[user] reloads [src].", SPAN_NOTICE("You load [count] round\s into [src]."))
 					if(reload_sound) playsound(src.loc, reload_sound, 75, 1)
 					cock_gun(user)
+					. = 1
 				update_firemode()
 		AM.update_icon()
 	else if(istype(A, /obj/item/ammo_casing))
@@ -246,6 +247,7 @@
 			C.forceMove(src)
 			loaded.Insert(1, C) //add to the head of the list
 		update_firemode()
+		. = 1
 		user.visible_message("[user] inserts \a [C] into [src].", SPAN_NOTICE("You insert \a [C] into [src]."))
 		if(bulletinsert_sound) playsound(src.loc, bulletinsert_sound, 75, 1)
 

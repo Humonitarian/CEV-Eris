@@ -28,6 +28,7 @@
 /obj/machinery/portable_atmospherics/canister/sleeping_agent
 	name = "Canister: \[N2O]"
 	icon_state = "redws"
+	description_antag = "Causes people to sleep temporarily. Needs high concentrations for a permanent sleep"
 	canister_color = "redws"
 	can_label = 0
 
@@ -121,7 +122,7 @@
 	else
 		return 0
 
-/obj/machinery/portable_atmospherics/canister/on_update_icon()
+/obj/machinery/portable_atmospherics/canister/update_icon()
 /*
 update_flag
 1 = holding
@@ -133,7 +134,7 @@ update_flag
 */
 
 	if (src.destroyed)
-		src.set_overlays(0)
+		src.overlays = 0
 		src.icon_state = text("[]-1", src.canister_color)
 		return
 
@@ -143,20 +144,20 @@ update_flag
 	if(check_change()) //Returns 1 if no change needed to icons.
 		return
 
-	src.set_overlays(0)
+	src.overlays = 0
 
 	if(update_flag & 1)
-		add_overlays("can-open")
+		overlays += "can-open"
 	if(update_flag & 2)
-		add_overlays("can-connector")
+		overlays += "can-connector"
 	if(update_flag & 4)
-		add_overlays("can-o0")
+		overlays += "can-o0"
 	if(update_flag & 8)
-		add_overlays("can-o1")
+		overlays += "can-o1"
 	else if(update_flag & 16)
-		add_overlays("can-o2")
+		overlays += "can-o2"
 	else if(update_flag & 32)
-		add_overlays("can-o3")
+		overlays += "can-o3"
 	return
 
 /obj/machinery/portable_atmospherics/canister/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)

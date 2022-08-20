@@ -42,27 +42,28 @@ This saves us from having to call add_fingerprint() any time something is put in
 	else
 		to_chat(src, SPAN_NOTICE("You are not holding anything to equip or draw."))
 	return
+
+
 /mob/living/carbon/human/verb/bag_equip()
 	set name = "bag-equip"
-	set hidden = 1
+	set hidden = TRUE
 
-	var/obj/item/I = get_active_hand()
-	var/potential = src.get_inactive_hand()
-	if(!I && !src.back)
-		to_chat(src, SPAN_NOTICE("You have no storage on your back or item in hand."))
-		return
-	if(istype(src.back,/obj/item/storage))
-		var/obj/item/storage/backpack = src.back
-		if(I)
-			equip_to_from_bag(I, backpack)
-		else
-			equip_to_from_bag(null, backpack)
-	else if(istype(potential, /obj/item/storage))
-		var/obj/item/storage/pack = potential
-		if(I)
-			equip_to_from_bag(I, pack)
-		else
-			equip_to_from_bag(null, pack)
+	var/obj/item/storage/S
+
+	for(var/i in list(get_inactive_hand(), back, get_active_hand()))
+		if(istype(i, /obj/item/storage))
+			S = i
+			break
+
+		else if(istype(i, /obj/item/rig))
+			var/obj/item/rig/R = i
+			if(R.storage)
+				S = R.storage.container
+				break
+
+	if(S && (!istype(S, /obj/item/storage/backpack) || S:worn_check()))
+		equip_to_from_bag(get_active_hand(), S)
+
 
 //Puts the item into our active hand if possible. returns 1 on success.
 /mob/living/carbon/human/put_in_active_hand(var/obj/item/W)
@@ -424,25 +425,52 @@ This saves us from having to call add_fingerprint() any time something is put in
 
 /mob/living/carbon/human/get_total_style()
 	var/style_factor = 0
-	for(var/obj/item/clothing/C in get_equipped_items())
-		style_factor += C.get_style()
+	var/suit_coverage = 0 // what a suit blocks from view
+	var/head_coverage = 0 // what a helmet or mask blocks from view
+	if (istype(wear_suit, /obj/item/clothing))
+		var/obj/item/clothing/suit/worn_suit = wear_suit // clothing has style_coverage.
+		suit_coverage = worn_suit.style_coverage
+		style_factor += worn_suit.get_style()
+	if (istype(head, /obj/item/clothing))
+		var/obj/item/clothing/suit/worn_hat = head
+		head_coverage = worn_hat.style_coverage
+		style_factor += worn_hat.get_style()
+	if (!(head_coverage & COVERS_WHOLE_FACE) && istype(wear_mask, /obj/item/clothing)) // is it hidden, and if not is it a mask?
+		var/obj/item/clothing/mask/worn_mask = wear_mask
+		head_coverage |= worn_mask.style_coverage
+		style_factor += worn_mask.get_style()
+	if (!(head_coverage & COVERS_EARS))
+		if (l_ear && !istype(l_ear, /obj/item/clothing/ears/offear)) // so we don't count earmuffs twice
+			style_factor += l_ear.get_style()
+		if (r_ear && !istype(r_ear, /obj/item/clothing/ears/offear))
+			style_factor += r_ear.get_style()
+	if (glasses && !(head_coverage & COVERS_EYES))
+		style_factor += glasses.get_style()
+	if (gloves && !(suit_coverage & COVERS_FOREARMS))
+		style_factor += gloves.get_style()
+	if (w_uniform && !((gloves || suit_coverage & COVERS_FOREARMS) && (shoes || suit_coverage & COVERS_FORELEGS) && (suit_coverage & (COVERS_TORSO|COVERS_UPPER_ARMS|COVERS_UPPER_LEGS)) == (COVERS_TORSO|COVERS_UPPER_ARMS|COVERS_UPPER_LEGS))) // if suit_coverage AND three flags equals those three flags, then it means it has those three flags.
+		style_factor += w_uniform.get_style()
+	if (shoes && !(suit_coverage & COVERS_FORELEGS))
+		style_factor += shoes.get_style()
+	if (back)
+		style_factor += back.get_style() // back and belt can't be covered
+	if (belt)
+		style_factor += belt.get_style()
+
 	if(restrained())
 		style_factor -= 1
 	if(feet_blood_DNA)
 		style_factor -= 1
 	if(blood_DNA)
 		style_factor -= 1
-	if(style_factor > MAX_HUMAN_STYLE)
-		style_factor = MAX_HUMAN_STYLE
-	else if(style_factor < MIN_HUMAN_STYLE)
-		style_factor = MIN_HUMAN_STYLE
+	style_factor = clamp(style_factor, MIN_HUMAN_STYLE, max_style) // if the ship wants you dead, you are NOT stylish.
 	return style_factor
 
 /mob/living/carbon/human/proc/get_style_factor()
 	var/style_factor = 1
-	var/actual_style = get_total_style()
-	if(actual_style >= 0)
-		style_factor += STYLE_MODIFIER * actual_style/MAX_HUMAN_STYLE
+	style = get_total_style()
+	if(style >= 0)
+		style_factor += STYLE_MODIFIER * style/MAX_HUMAN_STYLE
 	else
-		style_factor -= STYLE_MODIFIER * actual_style/MIN_HUMAN_STYLE
+		style_factor -= STYLE_MODIFIER * style/MIN_HUMAN_STYLE
 	return style_factor

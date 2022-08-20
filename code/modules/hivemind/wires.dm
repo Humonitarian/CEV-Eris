@@ -6,23 +6,33 @@
 	layer = 2
 	health = 		80
 	max_health = 	80 		//we are a little bit durable
-	spread_chance = 85
+	spread_chance = 95
 	var/list/killer_reagents = list("pacid", "sacid", "hclacid", "chlorine")
 	//internals
 	var/obj/machinery/hivemind_machine/node/master_node
 	var/list/wires_connections = list("0", "0", "0", "0")
-
+	var/my_area
 
 /obj/effect/plant/hivemind/New()
 	..()
 	icon = 'icons/obj/hivemind.dmi'
 	spawn(2)
 		update_neighbors()
-
+	var/area/A = get_area(src)
+	if(!A)
+		QDEL_IN(src, 1)
+		return
+	my_area = A.name
+	if(!(my_area in GLOB.hivemind_areas))
+		GLOB.hivemind_areas.Add(my_area)
+	GLOB.hivemind_areas[my_area]++
 
 /obj/effect/plant/hivemind/Destroy()
 	if(master_node)
 		master_node.my_wireweeds.Remove(src)
+	GLOB.hivemind_areas[my_area]--
+	if(!GLOB.hivemind_areas[my_area]) // Last wire in that area
+		GLOB.hivemind_areas.Remove(my_area)
 	return ..()
 
 
@@ -31,7 +41,7 @@
 		master_node.add_wireweed(child)
 	spawn(1)
 		child.dir = get_dir(loc, target_turf) //actually this means nothing for wires, but need for animation
-		FLICK("spread_anim", child)
+		flick("spread_anim", child)
 		child.forceMove(target_turf)
 		for(var/obj/effect/plant/hivemind/neighbor in range(1, child))
 			neighbor.update_neighbors()
@@ -78,8 +88,39 @@
 
 
 /obj/effect/plant/hivemind/spread()
-	if(hive_mind_ai && master_node)
-		..()
+	if(!hive_mind_ai || !master_node || !neighbors.len)
+		return
+
+	var/turf/target_turf = pick(neighbors)
+	if(target_turf.is_hole && !GLOB.hive_data_bool["spread_on_lower_z_level"])
+		// Not removed from neighbors, in case settings are change later
+		return
+
+	target_turf = get_connecting_turf(target_turf, loc)
+	var/area/target_area = get_area(target_turf)
+
+	// Entering the area for the first time
+	if(!(target_area.name in GLOB.hivemind_areas))
+		// If area limit is disabled (set to 0), or less than current number of occupied areas - expand and mark that area as occupied
+		if(!GLOB.hive_data_float["maximum_controlled_areas"] || GLOB.hivemind_areas.len < GLOB.hive_data_float["maximum_controlled_areas"])
+			GLOB.hivemind_areas.Add(target_area.name)
+		else
+			return
+
+	// Track amount of weed in the area, so at 0 weed area would be marked as unoccupied
+	GLOB.hivemind_areas[target_area.name]++
+
+	for(var/i in target_turf.contents)
+		if(istype(i, /obj/effect/plant) || istype(i, /obj/effect/dead_plant))
+			visible_message("[src] consumes [i]!")
+			qdel(i)
+
+	// Created on the same loc, for move animation to play properly
+	var/obj/effect/plant/child = new type(get_turf(src), seed, src)
+	after_spread(child, target_turf)
+	// Update neighboring tiles
+	for(var/obj/effect/plant/hivemind/neighbor in range(1, target_turf))
+		neighbor.neighbors -= target_turf
 
 
 /obj/effect/plant/hivemind/life()
@@ -101,7 +142,7 @@
 
 
 /obj/effect/plant/hivemind/refresh_icon()
-	cut_overlays()
+	overlays.Cut()
 	var/image/I
 	var/turf/simulated/floor/F = loc
 	if((locate(/obj/structure/burrow) in loc) && F.flooring.is_plating)
@@ -109,7 +150,7 @@
 	else
 		for(var/i = 1 to 4)
 			I = image(src.icon, "wires[wires_connections[i]]", dir = 1<<(i-1))
-			add_overlays(I)
+			overlays += I
 
 	//wallhug
 	for(var/direction in cardinal + list(NORTHEAST, NORTHWEST)-SOUTH)
@@ -130,7 +171,7 @@
 			if (T.y > y)
 				wall_hug_overlay.pixel_y += 32
 			wall_hug_overlay.layer = ABOVE_WINDOW_LAYER
-			add_overlays(wall_hug_overlay)
+			overlays += wall_hug_overlay
 
 
 
@@ -315,24 +356,25 @@
 	user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 
 	var/weapon_type
-	if (W.has_quality(QUALITY_CUTTING))
-		weapon_type = QUALITY_CUTTING
-	else if (W.has_quality(QUALITY_WELDING))
-		weapon_type = QUALITY_WELDING
+	if(user.a_intent == I_HURT)
+		if (W.has_quality(QUALITY_CUTTING))
+			weapon_type = QUALITY_CUTTING
+		else if (W.has_quality(QUALITY_WELDING))
+			weapon_type = QUALITY_WELDING
 
-	if(weapon_type)
-		if(W.use_tool(user, src, WORKTIME_FAST, weapon_type, FAILCHANCE_EASY, required_stat = STAT_MEC)) //Replaced STAT_ROB with STAT_MEC. you aren't ripping this out you are cutting it
-			user.visible_message(SPAN_DANGER("[user] cuts down [src]."), SPAN_DANGER("You cut down [src]."))
-			die_off()
+		if(weapon_type)
+			if(W.use_tool(user, src, WORKTIME_FAST, weapon_type, FAILCHANCE_EASY, required_stat = STAT_MEC))
+				user.visible_message(SPAN_DANGER("[user] cuts down [src]."), SPAN_DANGER("You cut down [src]."))
+				die_off()
+				return
 			return
-		return
-	else
-		if(W.sharp && W.force >= 10)
-			health -= rand(W.force/2, W.force) //hm, maybe make damage based on player's robust stat?
-			user.visible_message(SPAN_DANGER("[user] slices [src]."), SPAN_DANGER("You slice [src]."))
 		else
-			to_chat(user, SPAN_DANGER("You try to slice [src], but it's useless!"))
-	check_health()
+			if(W.sharp && W.force >= 10)
+				health -= rand(W.force/2, W.force) //hm, maybe make damage based on player's robust stat?
+				user.visible_message(SPAN_DANGER("[user] slices [src]."), SPAN_DANGER("You slice [src]."))
+			else
+				to_chat(user, SPAN_DANGER("You try to slice [src], but it's useless!"))
+		check_health()
 
 
 //fire is effective, but there need some time to melt the covering

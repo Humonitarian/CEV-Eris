@@ -7,6 +7,7 @@
 /obj/machinery/power/shield_generator
 	name = "advanced shield generator"
 	desc = "A heavy-duty shield generator and capacitor, capable of generating energy shields at large distances."
+	description_info = "Can be moved by retracting the power conduits with the appropiate right-click verb"
 	icon = 'icons/obj/machines/shielding.dmi'
 	icon_state = "generator0"
 	density = TRUE
@@ -83,25 +84,25 @@
 	var/tendrils_deployed = FALSE				// Whether the dummy capacitors are currently extended
 
 
-/obj/machinery/power/shield_generator/on_update_icon()
-	cut_overlays()
+/obj/machinery/power/shield_generator/update_icon()
+	overlays.Cut()
 	if(running)
-		SetIconState("generator1")
+		icon_state = "generator1"
 		set_light(2, 2, "#8AD55D")
 	else
-		SetIconState("generator0")
+		icon_state = "generator0"
 		set_light(0)
 	if (tendrils_deployed)
 		for (var/D in tendril_dirs)
 			var/I = image(icon,"capacitor_connected", dir = D)
-			add_overlays(I)
+			overlays += I
 
 	for (var/obj/machinery/shield_conduit/S in tendrils)
 		if (running)
-			S.SetIconState("conduit_1")
+			S.icon_state = "conduit_1"
 			S.bright_light()
 		else
-			S.SetIconState("conduit_0")
+			S.icon_state = "conduit_0"
 			S.no_light()
 
 

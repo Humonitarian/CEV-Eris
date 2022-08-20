@@ -1,6 +1,8 @@
 /obj/machinery/portable_atmospherics/hydroponics
 	name = "hydroponics tray"
 	icon = 'icons/obj/hydroponics_machines.dmi'
+	description_info = "The lid can be toggled to contain the atmosphere and control the luminosity"
+	description_antag = "Can be used to grow plants with lethal poison inside, like death berries"
 	icon_state = "hydrotray"
 	density = TRUE
 	anchored = TRUE
@@ -125,7 +127,7 @@
 		)
 
 	var/global/list/potency_reagents = list(
-		"diethylamine" =    2
+		"diethylamine" =    1
 	)
 
 /obj/machinery/portable_atmospherics/hydroponics/AltClick()
@@ -211,7 +213,7 @@
 				mutation_mod += beneficial_reagents[R.id][3] * reagent_total
 			//potency reagents boost the plats genetic potency, tweaking needed
 			if(potency_reagents[R.id])
-				seed.set_trait(TRAIT_POTENCY, TRAIT_POTENCY + (potency_reagents[R.id][1] * reagent_total * 0.5))
+				seed.set_trait(TRAIT_POTENCY, min(100, seed.get_trait(TRAIT_POTENCY) + potency_reagents[R.id] * reagent_total))
 
 			// Mutagen is distinct from the previous types and mostly has a chance of proccing a mutation.
 			if(mutagenic_reagents[R.id])
@@ -468,7 +470,7 @@
 						else
 							to_chat(user, SPAN_NOTICE("Nothing happens."))
 							return
-				to_chat(user, SPAN_NOTICE("You [anchored ? "wrench" : "unwrench"] \the [src]."))
+				to_chat(user, SPAN_NOTICE("You [anchored ? "unwrench" : "wrench"] \the [src]."))
 				set_anchored(!anchored)
 				return
 			return

@@ -18,9 +18,9 @@
 	qdel(ingested)
 	qdel(touching)
 	// We don't qdel(bloodstr) because it's the same as qdel(reagents)
-	QDEL_NULL_LIST(internal_organs)
-	QDEL_NULL_LIST(stomach_contents)
-	QDEL_NULL_LIST(hallucinations)
+	QDEL_LIST(internal_organs)
+	QDEL_LIST(stomach_contents)
+	QDEL_LIST(hallucinations)
 	return ..()
 
 /mob/living/carbon/rejuvenate()
@@ -165,9 +165,6 @@
 		if(src == M && ishuman(src))
 			var/mob/living/carbon/human/H = src
 			H.check_self_for_injuries()
-
-			if((SKELETON in H.mutations) && (!H.w_uniform) && (!H.wear_suit))
-				H.play_xylophone()
 		else if (on_fire)
 			playsound(src.loc, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
 			if (M.on_fire)
@@ -248,17 +245,6 @@
 /mob/living/carbon/proc/eyecheck()
 	return 0
 
-// ++++ROCKDTBEN++++ MOB PROCS -- Ask me before touching.
-// Stop! ... Hammertime! ~Carn
-
-/mob/living/carbon/proc/getDNA()
-	return dna
-
-/mob/living/carbon/proc/setDNA(var/datum/dna/newDNA)
-	dna = newDNA
-
-// ++++ROCKDTBEN++++ MOB PROCS //END
-
 //Throwing stuff
 /mob/proc/throw_item(atom/target)
 	return
@@ -272,6 +258,11 @@
 	var/atom/movable/item = src.get_active_hand()
 
 	if(!item) return
+
+	if(istype(item, /obj/item/stack/thrown))
+		var/obj/item/stack/thrown/V = item
+		V.fireAt(target, src)
+		return
 
 	if (istype(item, /obj/item/grab))
 		var/obj/item/grab/G = item
@@ -377,6 +368,7 @@
 		to_chat(src, SPAN_WARNING("You slipped on [slipped_on]!"))
 		playsound(src.loc, 'sound/misc/slip.ogg', 50, 1, -3)
 	Weaken(stun_duration)
+
 	return TRUE
 
 /mob/living/carbon/proc/add_chemical_effect(var/effect, var/magnitude = 1)

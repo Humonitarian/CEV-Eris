@@ -99,6 +99,24 @@
 	if(href_list["ready"])
 		if(SSticker.current_state <= GAME_STATE_PREGAME) // Make sure we don't ready up after the round has started
 			ready = text2num(href_list["ready"])
+			if(ready)
+				// Warn the player if they are trying to spawn without a brain
+				var/datum/body_modification/mod = client.prefs.get_modification(BP_BRAIN)
+				if(istype(mod, /datum/body_modification/limb/amputation))
+					if(alert(src,"Are you sure you wish to spawn without a brain? This will likely cause you to do die immediately. \
+								If not, go to the Augmentation section of Setup Character and change the \"brain\" slot from Removed to the desired kind of brain.", \
+								"Player Setup", "Yes", "No") == "No")
+						ready = 0
+						return
+
+				// Warn the player if they are trying to spawn without eyes
+				mod = client.prefs.get_modification(BP_EYES)
+				if(istype(mod, /datum/body_modification/limb/amputation))
+					if(alert(src,"Are you sure you wish to spawn without eyes? It will likely be difficult to see without them. \
+								If not, go to the Augmentation section of Setup Character and change the \"eyes\" slot from Removed to the desired kind of eyes.", \
+								"Player Setup", "Yes", "No") == "No")
+						ready = 0
+						return
 		else
 			ready = 0
 
@@ -119,7 +137,7 @@
 			close_spawn_windows()
 			var/turf/T = pick_spawn_location("Observer")
 			if(istype(T))
-				to_chat(src, SPAN_NOTICE("You are observer now."))
+				to_chat(src, SPAN_NOTICE("You are now observing."))
 				observer.forceMove(T)
 			else
 				to_chat(src, "<span class='danger'>Could not locate an observer spawn point. Use the Teleport verb to jump to the station map.</span>")
@@ -149,6 +167,22 @@
 		if(SSticker.current_state != GAME_STATE_PLAYING)
 			to_chat(usr, "\red The round is either not ready, or has already finished...")
 			return
+
+		// Warn the player if they are trying to spawn without a brain
+		var/datum/body_modification/mod = client.prefs.get_modification(BP_BRAIN)
+		if(istype(mod, /datum/body_modification/limb/amputation))
+			if(alert(src,"Are you sure you wish to spawn without a brain? This will likely cause you to do die immediately. \
+			              If not, go to the Augmentation section of Setup Character and change the \"brain\" slot from Removed to the desired kind of brain.", \
+						  "Player Setup", "Yes", "No") == "No")
+				return 0
+
+		// Warn the player if they are trying to spawn without eyes
+		mod = client.prefs.get_modification(BP_EYES)
+		if(istype(mod, /datum/body_modification/limb/amputation))
+			if(alert(src,"Are you sure you wish to spawn without eyes? It will likely be difficult to see without them. \
+			              If not, go to the Augmentation section of Setup Character and change the \"eyes\" slot from Removed to the desired kind of eyes.", \
+						  "Player Setup", "Yes", "No") == "No")
+				return 0
 
 		if(!check_rights(R_ADMIN, 0))
 			var/datum/species/S = all_species[client.prefs.species]
@@ -365,16 +399,11 @@
 	sound_to(src, sound(null, repeat = 0, wait = 0, volume = 85, channel = GLOB.lobby_sound_channel))
 
 	new_character.name = real_name
-	new_character.dna.ready_dna(new_character)
-	new_character.dna.b_type = client.prefs.b_type
+	new_character.b_type = client.prefs.b_type
 	new_character.sync_organ_dna()
 	if(client.prefs.disabilities)
-		// Set defer to 1 if you add more crap here so it only recalculates struc_enzymes once. - N3X
-		new_character.dna.SetSEState(GLASSESBLOCK,1,0)
-		new_character.disabilities |= NEARSIGHTED
-
-	// And uncomment this, too.
-	//new_character.dna.UpdateSE()
+		if(client.prefs.disabilities & NEARSIGHTED)
+			new_character.add_mutation(MUTATION_NEARSIGHTED)
 
 	// Do the initial caching of the player's body icons.
 	new_character.force_update_limbs()

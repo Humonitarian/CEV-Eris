@@ -44,7 +44,7 @@ var/global/universe_has_ended = 0
 
 	for(var/mob/living/M in GLOB.player_list)
 		if (M.HUDtech.Find("flash"))
-			FLICK("e_flash", M.HUDtech["flash"])
+			flick("e_flash", M.HUDtech["flash"])
 
 	if(evacuation_controller.cancel_evacuation())
 		priority_announcement.Announce("The escape pod launch sequence has been aborted due to bluespace distortion.")
@@ -58,7 +58,7 @@ var/global/universe_has_ended = 0
 
 	spawn(rand(30,60) SECONDS)
 		var/txt = {"
-AUTOMATED ALERT: Attention [station_name()], this is a high alert broadcast to all ships from the central communication hub of the Hansa Trade Union, a catastrophe has happened on the ship [station_name()], information regarding the incident is classified.
+AUTOMATED ALERT: Attention [station_name()], this is a high alert broadcast to all ships from the central communication hub of the [boss_name], a catastrophe has happened on the ship [station_name()], information regarding the incident is classified.
 
 We highly suggest, that all corporate owned, and free ships within listening range depart into Bluespace. Until the incident ends, all employees aboard HTU operated ships will have their pay-rolls will be frozen, and their have benefits cut, independent ships not included.
 
@@ -114,8 +114,8 @@ AUTOMATED ALERT: Link to [command_name()] lost.
 			continue
 		if(A.owner.current.stat!=2)
 			A.owner.current.Weaken(10)
-//			FLICK("e_flash", M.current.flash)
+//			flick("e_flash", M.current.flash)
 			if (A.owner.current.HUDtech.Find("flash"))
-				FLICK("e_flash", A.owner.current.HUDtech["flash"])
+				flick("e_flash", A.owner.current.HUDtech["flash"])
 
 		A.remove_antagonist()

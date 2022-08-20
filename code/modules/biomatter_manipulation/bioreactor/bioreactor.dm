@@ -96,11 +96,11 @@
 				if(chamber_closed)
 					glass.icon_state = ""
 					glass.density = FALSE
-					FLICK("glassdoor_open", glass)
+					flick("glassdoor_open", glass)
 				else
 					glass.icon_state = "platform_door"
 					glass.density = initial(glass.density)
-					FLICK("glassdoor_close", glass)
+					flick("glassdoor_close", glass)
 				playsound(glass.loc, 'sound/machines/windowdoor.ogg', 100, 1)
 	chamber_closed = !chamber_closed
 
@@ -110,12 +110,12 @@
 		return
 	if(chamber_solution)
 		solution.icon_state = ""
-		FLICK("solution_pump_out", solution)
+		flick("solution_pump_out", solution)
 		for(var/obj/machinery/multistructure/bioreactor_part/platform/platform in platforms)
 			platform.set_light(0)
 	else
 		solution.icon_state = initial(solution.icon_state)
-		FLICK("solution_pump_in", solution)
+		flick("solution_pump_in", solution)
 		for(var/obj/machinery/multistructure/bioreactor_part/platform/platform in platforms)
 			platform.set_light(1, 3, COLOR_LIGHTING_ORANGE_DARK)
 	chamber_solution = !chamber_solution
@@ -138,6 +138,8 @@
 /obj/structure/reagent_dispensers/biomatter
 	name = "medium biomatter canister"
 	desc = "A biomatter canister. It is used to store high amounts of biomatter."
+	description_info = "Can hold 400 units"
+	description_antag = "With a beaker, raw biomatter can be pulled out. When spilled on the floor, the puddles are highly lethal to anyone without protection. Killing them in several minutes if they do not receive treatment"
 	icon = 'icons/obj/bioreactor_misc.dmi'
 	icon_state = "biomatter_tank_medium"
 	amount_per_transfer_from_this = 50
@@ -148,6 +150,8 @@
 /obj/structure/reagent_dispensers/biomatter/large
 	name = "large biomatter canister"
 	icon_state = "biomatter_tank_large"
+	description_info = "Can hold 800 units"
+	description_antag = "With a beaker, raw biomatter can be pulled out. When spilled on the floor, the puddles are highly lethal to anyone without protection. Killing them in several minutes if they do not receive treatment"
 	volume = 800
 
 

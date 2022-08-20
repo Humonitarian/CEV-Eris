@@ -282,8 +282,6 @@ Turf and target are seperate in case you want to teleport some distance from a t
 	name = newname
 	if(mind)
 		mind.name = newname
-	if(dna)
-		dna.real_name = real_name
 
 	if(oldname)
 		//update the datacore records! This is goig to be a bit costly.
@@ -787,7 +785,7 @@ proc/GaussRandRound(var/sigma, var/roundto)
 					X.set_dir(old_dir1)
 					X.icon_state = old_icon_state1
 					X.icon = old_icon1 //Shuttle floors are in shuttle.dmi while the defaults are floors.dmi
-					X.set_overlays(old_overlays)
+					X.overlays = old_overlays
 					X.underlays = old_underlays
 					X.decals = old_decals
 					X.opacity = old_opacity
@@ -972,7 +970,7 @@ GLOBAL_LIST_INIT(duplicate_forbidden_vars,list(
 					X.set_dir(old_dir1)
 					X.icon_state = old_icon_state1
 					X.icon = old_icon1 //Shuttle floors are in shuttle.dmi while the defaults are floors.dmi
-					X.set_overlays(old_overlays)
+					X.overlays = old_overlays
 					X.underlays = old_underlays
 
 					var/list/objs = new/list()
@@ -1266,8 +1264,9 @@ var/list/FLOORITEMS = list(
 	see_in_dark = 1e6
 
 /mob/dview/Destroy()
-	crash_with("Prevented attempt to delete dview mob: [log_info_line(src)]")
-	return QDEL_HINT_LETMELIVE // Prevents destruction
+	. = QDEL_HINT_LETMELIVE // Prevents destruction
+	CRASH("Prevented attempt to delete dview mob: [log_info_line(src)]")
+
 
 /atom/proc/get_light_and_color(atom/origin)
 	if(origin)
@@ -1277,9 +1276,7 @@ var/list/FLOORITEMS = list(
 /mob/dview/Initialize() // Properly prevents this mob from gaining huds or joining any global lists
 	return INITIALIZE_HINT_NORMAL
 
-// call to generate a stack trace and print to runtime logs
-/proc/crash_with(msg)
-	CRASH(msg)
+
 
 /proc/CheckFace(atom/Obj1, atom/Obj2)
 	var/CurrentDir = get_dir(Obj1, Obj2)
@@ -1288,6 +1285,41 @@ var/list/FLOORITEMS = list(
 		return 1
 	else
 		return 0
+
+//gives us the stack trace from CRASH() without ending the current proc.
+/proc/stack_trace(msg)
+	CRASH(msg)
+
+/datum/proc/stack_trace(msg)
+	CRASH(msg)
+
+/proc/pass(...)
+	return
+
+// \ref behaviour got changed in 512 so this is necesary to replicate old behaviour.
+// If it ever becomes necesary to get a more performant REF(), this lies here in wait
+// #define REF(thing) (thing && istype(thing, /datum) && (thing:datum_flags & DF_USE_TAG) && thing:tag ? "[thing:tag]" : "\ref[thing]")
+/proc/REF(input)
+	// if(istype(input, /datum))
+	// 	var/datum/thing = input
+	// 	if(thing.datum_flags & DF_USE_TAG)
+	// 		if(!thing.tag)
+	// 			stack_trace("A ref was requested of an object with DF_USE_TAG set but no tag: [thing]")
+	// 			thing.datum_flags &= ~DF_USE_TAG
+	// 		else
+	// 			return "\[[url_encode(thing.tag)]\]"
+	return "\ref[input]"
+
+// Makes a call in the context of a different usr
+// Use sparingly
+/world/proc/PushUsr(mob/M, datum/callback/CB, ...)
+	var/temp = usr
+	usr = M
+	if (length(args) > 2)
+		. = CB.Invoke(arglist(args.Copy(3)))
+	else
+		. = CB.Invoke()
+	usr = temp
 
 //datum may be null, but it does need to be a typed var
 #define NAMEOF(datum, X) (#X || ##datum.##X)
@@ -1305,3 +1337,15 @@ var/list/FLOORITEMS = list(
 	// 	D.vv_edit_var(var_name, var_value) //same result generally, unless badmemes
 	// else
 	D.vars[var_name] = var_value
+
+/proc/generate_single_gun_number()
+	return pick(1,2,3,4,5,6,7,8,9,0)
+
+/proc/generate_gun_serial(digit_numbers)
+	var/generated_code = ""
+	while(digit_numbers)
+		digit_numbers--
+		generated_code += "[generate_single_gun_number()]" // cast to string
+	return generated_code
+
+

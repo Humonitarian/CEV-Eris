@@ -64,6 +64,8 @@
 /obj/machinery/power/apc
 	name = "area power controller"
 	desc = "A control terminal for the area electrical systems."
+	description_info = "Controls all of this area's machinery."
+	description_antag = "Can be unlocked by pulsing the lock wire. Can also be saboutaged by inserting plasma into its cell, making it blow whenever its turned on"
 
 	icon_state = "apc0"
 	anchored = TRUE
@@ -150,7 +152,7 @@
 		return FALSE
 
 	if(surge && !emagged)
-		FLICK("apc-spark", src)
+		flick("apc-spark", src)
 		emagged = TRUE
 		locked = FALSE
 		update_icon()
@@ -273,7 +275,7 @@
 
 // update the APC icon to show the three base states
 // also add overlays for indicator lights
-/obj/machinery/power/apc/on_update_icon()
+/obj/machinery/power/apc/update_icon()
 	if (!status_overlays)
 		status_overlays = 1
 		status_overlays_lock = new
@@ -352,19 +354,19 @@
 
 	if(!(update_state & UPDATE_ALLGOOD))
 		if(overlays.len)
-			set_overlays(0)
+			overlays = 0
 			return
 
 	if(update > 1)
 		if(overlays.len)
 			overlays.len = 0
 		if(!(stat & (BROKEN|MAINT)) && update_state & UPDATE_ALLGOOD)
-			add_overlays(status_overlays_lock[locked+1])
-			add_overlays(status_overlays_charging[charging+1])
+			overlays += status_overlays_lock[locked+1]
+			overlays += status_overlays_charging[charging+1]
 			if(operating)
-				add_overlays(status_overlays_equipment[equipment+1])
-				add_overlays(status_overlays_lighting[lighting+1])
-				add_overlays(status_overlays_environ[environ+1])
+				overlays += status_overlays_equipment[equipment+1]
+				overlays += status_overlays_lighting[lighting+1]
+				overlays += status_overlays_environ[environ+1]
 
 
 /obj/machinery/power/apc/proc/check_updates()
@@ -709,7 +711,7 @@
 		else if(stat & (BROKEN|MAINT))
 			to_chat(user, "Nothing happens.")
 		else
-			FLICK("apc-spark", src)
+			flick("apc-spark", src)
 			if (do_after(user,6,src))
 				if(prob(50))
 					emagged = TRUE
@@ -938,6 +940,12 @@
 	if(!can_use(usr, 1))
 		return TRUE
 
+	else if(href_list["reboot"])
+		failure_timer = 0
+		update_icon()
+		update()
+		return TRUE
+
 	if(!issilicon(usr) && (locked && !emagged))
 		// Shouldn't happen, this is here to prevent href exploits
 		to_chat(usr, "You must unlock the panel to use this!")
@@ -945,11 +953,6 @@
 
 	if (href_list["lock"])
 		coverlocked = !coverlocked
-
-	else if( href_list["reboot"] )
-		failure_timer = 0
-		update_icon()
-		update()
 
 	else if (href_list["breaker"])
 		toggle_breaker()

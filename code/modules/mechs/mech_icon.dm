@@ -3,7 +3,10 @@
 	if(!GLOB.mech_image_cache[use_key])
 		var/image/I = image(icon = cache_icon, icon_state = cache_key)
 		if(image_colour)
-			I.color = image_colour
+			var/image/masked_color = image(icon = cache_icon, icon_state = "[cache_key]_mask")
+			masked_color.color = image_colour
+			masked_color.blend_mode = BLEND_MULTIPLY
+			I.overlays += masked_color
 		if(decal)
 			var/decal_key = "decal-[cache_key]"
 			if(!GLOB.mech_icon_cache[decal_key])
@@ -13,7 +16,7 @@
 				var/icon/decal_icon = icon(MECH_DECALS_ICON, decal)
 				decal_icon.Blend(GLOB.mech_icon_cache[template_key], ICON_MULTIPLY)
 				GLOB.mech_icon_cache[decal_key] = decal_icon
-			I.overlays.Add(get_mech_image(null, decal_key, GLOB.mech_icon_cache[decal_key]))
+			I.overlays += get_mech_image(null, decal_key, GLOB.mech_icon_cache[decal_key])
 		I.appearance_flags |= RESET_COLOR
 		I.layer = overlay_layer
 		I.plane = FLOAT_PLANE
@@ -26,7 +29,7 @@
 		all_images += get_mech_image(comp.decal, comp.icon_state, comp.on_mech_icon, comp.color, overlay_layer)
 	return all_images
 
-/mob/living/exosuit/on_update_icon()
+/mob/living/exosuit/update_icon()
 	. = ..()
 	var/list/new_overlays = get_mech_images(list(body, head), MECH_BASE_LAYER)
 	if(body && !hatch_closed)
@@ -42,12 +45,24 @@
 		if(hardpoint_object)
 			var/use_icon_state = "[hardpoint_object.icon_state]_[hardpoint]"
 			if(use_icon_state in GLOB.mech_weapon_overlays)
-				new_overlays += get_mech_image(null, use_icon_state, MECH_WEAPON_OVERLAYS_ICON, null, hardpoint_object.mech_layer )
-	set_overlays(new_overlays)
+				var/color = COLOR_WHITE
+				var/decal = null
+				if(body && (hardpoint in list(HARDPOINT_BACK, HARDPOINT_RIGHT_SHOULDER, HARDPOINT_LEFT_SHOULDER)))
+					color = body.color
+					decal = body.decal
+				else if(arms && (hardpoint in list(HARDPOINT_RIGHT_HAND, HARDPOINT_LEFT_HAND)))
+					color = arms.color
+					decal = arms.decal
+				else if(head)
+					color = head.color
+					decal = head.decal
+
+				new_overlays += get_mech_image(decal, use_icon_state, 'icons/mechs/mech_weapon_overlays.dmi', color, hardpoint_object.mech_layer )
+	overlays = new_overlays
 
 /mob/living/exosuit/proc/update_pilots(var/update_overlays = TRUE)
 	if(update_overlays && LAZYLEN(pilot_overlays))
-		remove_overlays(pilot_overlays)
+		overlays -= pilot_overlays
 	pilot_overlays = null
 	if(!body || ((body.pilot_coverage < 100 || body.transparent_cabin) && !body.hide_pilot))
 		for(var/i = 1 to LAZYLEN(pilots))
@@ -66,7 +81,7 @@
 			LAZYADD(pilot_overlays, draw_pilot)
 			update_mech_hud_4(pilot)
 		if(update_overlays && LAZYLEN(pilot_overlays))
-			add_overlays(pilot_overlays)
+			overlays += pilot_overlays
 
 
 

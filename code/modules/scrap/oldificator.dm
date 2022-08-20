@@ -32,6 +32,44 @@
 		return TRUE
 	return FALSE
 
+/obj/item/gun/make_young()
+	var/list/stored_upgrades = item_upgrades.Copy()
+	for (var/obj/item/toremove in stored_upgrades)
+		var/datum/component/item_upgrade/IU = toremove.GetComponent(/datum/component/item_upgrade)
+		if (IU)
+			SEND_SIGNAL(toremove, COMSIG_REMOVE, src)
+			visible_message(SPAN_NOTICE("\The [toremove] detaches from \the [src]."))
+			. = TRUE
+
+	refresh_upgrades()
+	if (.) // this is so it always returns true if it did something
+		..()
+	else
+		. = ..()
+
+/obj/item/tool/make_young()
+	var/list/stored_upgrades = item_upgrades.Copy()
+	for (var/obj/item/toremove in stored_upgrades)
+		var/datum/component/item_upgrade/IU = toremove.GetComponent(/datum/component/item_upgrade)
+		if (IU)
+			SEND_SIGNAL(toremove, COMSIG_REMOVE, src)
+			visible_message(SPAN_NOTICE("\The [toremove] detaches from \the [src]."))
+			. = TRUE
+
+	refresh_upgrades()
+	if (.) // this is so it always returns true if it did something
+		..()
+	else
+		. = ..()
+
+/obj/item/computer_hardware/hard_drive/make_young()
+	.=..()
+	stored_files = list()
+
+/obj/item/computer_hardware/hard_drive/portable/design/make_young()
+	.=..()
+	license = min(license, 0)
+
 /obj/proc/make_old(low_quality_oldification)	//low_quality_oldification changes names and colors to fit with "bad prints" instead of "very old items" asthetic
 	GET_COMPONENT(oldified, /datum/component/oldficator)
 	if(oldified)
@@ -132,7 +170,7 @@
 		var/actual_volume = reagents.total_volume
 		for(var/datum/reagent/R in reagents.reagent_list)
 			reagents.remove_reagent(R.id,rand(0, R.volume),TRUE)
-		reagents.add_reagent("toxin", rand(0, actual_volume - reagents.total_volume))
+		reagents.add_reagent("mold", rand(0, actual_volume - reagents.total_volume))
 
 /obj/item/reagent_containers/food/snacks/make_old(low_quality_oldification)
 	.=..()
@@ -262,17 +300,6 @@
 	explosion(sender.loc, 1, 1, 1, 3)
 	sender.drop_from_inventory(src)
 	QDEL_NULL(src)
-
-/obj/item/dnainjector/make_old(low_quality_oldification)
-	.=..()
-	if(.)
-		if(prob(75))
-			name = "DNA-Injector (unknown)"
-			desc = pick("1mm0r74l17y 53rum", "1ncr3d1bl3 73l3p47y hNlk", "5up3rhum4n m16h7")
-			value = 0xFFF
-		if(prob(75))
-			block = pick(MONKEYBLOCK, HALLUCINATIONBLOCK, DEAFBLOCK, BLINDBLOCK, NERVOUSBLOCK, TWITCHBLOCK, CLUMSYBLOCK, COUGHBLOCK, HEADACHEBLOCK, GLASSESBLOCK)
-
 
 /obj/item/clothing/glasses/hud/make_old(low_quality_oldification)
 	GET_COMPONENT(oldified, /datum/component/oldficator)

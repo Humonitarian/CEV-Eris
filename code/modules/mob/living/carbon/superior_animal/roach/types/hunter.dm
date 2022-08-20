@@ -6,11 +6,23 @@
 	turns_per_move = 3
 	maxHealth = 25
 	health = 25
-	move_to_delay = 3.5
+	move_to_delay = 1
 
 	melee_damage_lower = 4
-	melee_damage_upper = 11
+	melee_damage_upper = 13
+	armor_penetration = 20
 
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/roachmeat/jager
 	meat_amount = 3
 	rarity_value = 11.25
+
+	// Armor related variables - jager jacket
+	armor = list(
+		melee = 20,
+		bullet = 10,
+		energy = 10,
+		bomb = 0,
+		bio = 25,
+		rad = 50
+	)
+	

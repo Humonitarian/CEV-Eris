@@ -22,7 +22,7 @@
 	structure_damage_factor = STRUCTURE_DAMAGE_BLUNT
 
 /obj/item/melee/classic_baton/attack(mob/M, mob/living/user)
-	if ((CLUMSY in user.mutations) && prob(50))
+/*	if ((CLUMSY in user.mutations) && prob(50))
 		to_chat(user, SPAN_WARNING("You club yourself over the head."))
 		user.Weaken(3 * force)
 		if(ishuman(user))
@@ -31,6 +31,7 @@
 		else
 			user.take_organ_damage(2 * force)
 		return
+*/
 	return ..()
 
 //Telescopic baton
@@ -78,20 +79,20 @@
 	add_fingerprint(user)
 
 	if(blood_overlay && blood_DNA && (blood_DNA.len >= 1)) //updates blood overlay, if any
-		cut_overlays()//this might delete other item overlays as well but eeeeeeeh
+		overlays.Cut()//this might delete other item overlays as well but eeeeeeeh
 
 		var/icon/I = new /icon(src.icon, src.icon_state)
 		I.Blend(new /icon('icons/effects/blood.dmi', rgb(255,255,255)),ICON_ADD)
 		I.Blend(new /icon('icons/effects/blood.dmi', "itemblood"),ICON_MULTIPLY)
 		blood_overlay = I
 
-		add_overlays(blood_overlay)
+		overlays += blood_overlay
 
 	return
 
 /obj/item/melee/telebaton/attack(mob/target, mob/living/user)
 	if(on)
-		if ((CLUMSY in user.mutations) && prob(50))
+/*		if ((CLUMSY in user.mutations) && prob(50))
 			to_chat(user, SPAN_WARNING("You club yourself over the head."))
 			user.Weaken(3 * force)
 			if(ishuman(user))
@@ -100,6 +101,7 @@
 			else
 				user.take_organ_damage(2*force)
 			return
+*/
 		if(..())
 			//playsound(src.loc, "swing_hit", 50, 1, -1)
 			return

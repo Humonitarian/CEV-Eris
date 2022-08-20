@@ -100,6 +100,8 @@ Class Procs:
 	icon = 'icons/obj/stationobjs.dmi'
 	w_class = ITEM_SIZE_GARGANTUAN
 
+	price_tag = 100
+
 	var/stat = 0
 	var/emagged = 0
 	var/use_power = IDLE_POWER_USE
@@ -120,6 +122,10 @@ Class Procs:
 	var/current_power_usage = 0 // How much power are we currently using, dont change by hand, change power_usage vars and then use set_power_use
 	var/area/current_power_area // What area are we powering currently
 
+	var/machine_integrity = 360
+
+	var/hacked = FALSE // If this machine has had its access requirements hacked or not
+
 
 /obj/machinery/Initialize(mapload, d=0)
 	. = ..()
@@ -127,6 +133,8 @@ Class Procs:
 		set_dir(d)
 	InitCircuit()
 	GLOB.machines += src
+	power_change()
+	set_power_use(IDLE_POWER_USE)
 	START_PROCESSING(SSmachines, src)
 
 /obj/machinery/Destroy()
@@ -429,3 +437,8 @@ Class Procs:
 // Unwrenching = unpluging from a power source
 /obj/machinery/wrenched_change()
 	update_power_use()
+
+/obj/machinery/get_item_cost(export)
+	. = ..()
+	for(var/atom/movable/i in component_parts)
+		. += SStrade.get_new_cost(i)

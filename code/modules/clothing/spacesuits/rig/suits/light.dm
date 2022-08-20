@@ -14,6 +14,7 @@
 	)
 	emp_protection = 10
 	slowdown = 0
+	obscuration = 0
 	item_flags = STOPPRESSUREDAMAGE | THICKMATERIAL | DRAG_AND_DROP_UNEQUIP | EQUIP_SOUNDS
 	offline_slowdown = 0
 	offline_vision_restriction = 0
@@ -61,6 +62,7 @@
 		/obj/item/rig_module/electrowarfare_suite,
 		/obj/item/rig_module/voice,
 		/obj/item/rig_module/vision,
+		/obj/item/rig_module/storage
 		)
 
 //The cybersuit is not space-proof. It does however, have good siemens_coefficient values
@@ -107,12 +109,13 @@
 		/obj/item/rig_module/vision,
 		/obj/item/rig_module/voice,
 		/obj/item/rig_module/fabricator/energy_net,
-		/obj/item/rig_module/chem_dispenser,
+		/obj/item/rig_module/modular_injector/combat,
 		/obj/item/rig_module/grenade_launcher,
 		/obj/item/rig_module/ai_container,
 		/obj/item/rig_module/power_sink,
 		/obj/item/rig_module/datajack,
-		/obj/item/rig_module/self_destruct
+		/obj/item/rig_module/self_destruct,
+		/obj/item/rig_module/storage
 		)
 
 /obj/item/clothing/gloves/rig/light/ninja
@@ -132,5 +135,6 @@
 
 	initial_modules = list(
 		/obj/item/rig_module/stealth_field,
-		/obj/item/rig_module/vision
+		/obj/item/rig_module/vision,
+		/obj/item/rig_module/storage
 		)

@@ -180,22 +180,6 @@
 	unlocks_designs = list("tesla_coil", "grounding_rod")
 */
 
-// TO ADD: advmop?, holosign, spraycan, spacesuit & helmet?, glowsticks_adv, stimpack
-/datum/technology/supplyanddemand
-	name = "Supply And Demand"
-	desc = "Supply And Demand"
-	tech_type = RESEARCH_ENGINEERING
-
-	x = 0.4
-	y = 0.6
-	icon = "advmop"
-
-	required_technologies = list(/datum/technology/basic_engineering)
-	required_tech_levels = list()
-	cost = 500
-
-	unlocks_designs = list(/datum/design/research/circuit/ordercomp, /datum/design/research/circuit/supplycomp)
-
 //TOOLS BRANCH
 // TO ADD: ore_redemption, mining_equipment_vendor, mining_fabricator?
 /datum/technology/basic_mining
@@ -216,7 +200,7 @@
 
 /datum/technology/advanced_mining
 	name = "Advanced Mining"
-	desc = "Static drill, improved handrill."
+	desc = "Static drill, mining turret, improved handrill."
 	tech_type = RESEARCH_ENGINEERING
 
 	x = 0.4
@@ -228,7 +212,7 @@
 	cost = 2000
 
 	unlocks_designs = list(	/datum/design/research/circuit/miningdrill,
-							/datum/design/research/circuit/miningdrillbrace,
+							/datum/design/research/circuit/miningturret,
 							/datum/design/research/item/weapon/mining/drill_diamond,
 							/datum/design/research/item/weapon/mining/jackhammer,
 							/datum/design/research/item/weapon/mining/scanner

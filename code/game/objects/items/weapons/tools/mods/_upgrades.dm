@@ -281,7 +281,7 @@
 	if(weapon_upgrades[GUN_UPGRADE_MOVE_DELAY_MULT])
 		G.move_delay *= weapon_upgrades[GUN_UPGRADE_MOVE_DELAY_MULT]
 	if(weapon_upgrades[GUN_UPGRADE_RECOIL])
-		G.recoil_buildup *= weapon_upgrades[GUN_UPGRADE_RECOIL]
+		G.recoil = G.recoil.modifyAllRatings(weapon_upgrades[GUN_UPGRADE_RECOIL])
 	if(weapon_upgrades[GUN_UPGRADE_MUZZLEFLASH])
 		G.muzzle_flash *= weapon_upgrades[GUN_UPGRADE_MUZZLEFLASH]
 	if(weapon_upgrades[GUN_UPGRADE_SILENCER])
@@ -308,6 +308,10 @@
 		G.fire_sound = 'sound/items/bikehorn.ogg'
 	if(weapon_upgrades[GUN_UPGRADE_RIGGED])
 		G.rigged = TRUE
+	if(weapon_upgrades[GUN_UPGRADE_FOREGRIP])
+		G.braceable = 0
+	if(weapon_upgrades[GUN_UPGRADE_BIPOD])
+		G.braceable = 2
 	if(weapon_upgrades[GUN_UPGRADE_EXPLODE])
 		G.rigged = 2
 	if(weapon_upgrades[GUN_UPGRADE_ZOOM])
@@ -329,7 +333,7 @@
 	if(weapon_upgrades[GUN_UPGRADE_MELEEPENETRATION])
 		G.armor_penetration += weapon_upgrades[GUN_UPGRADE_MELEEPENETRATION]
 	if(weapon_upgrades[GUN_UPGRADE_ONEHANDPENALTY])
-		G.one_hand_penalty *= weapon_upgrades[GUN_UPGRADE_ONEHANDPENALTY]
+		G.recoil = G.recoil.modifyRating(_one_hand_penalty = weapon_upgrades[GUN_UPGRADE_ONEHANDPENALTY])
 
 	if(weapon_upgrades[GUN_UPGRADE_DNALOCK])
 		G.dna_compare_samples = TRUE

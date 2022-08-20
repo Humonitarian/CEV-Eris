@@ -13,6 +13,7 @@
 	name = "disposal unit"
 	desc = "A pneumatic waste disposal unit."
 	icon = 'icons/obj/pipes/disposal.dmi'
+	description_antag = "Can be used to escape if bolted in a room, or to get rid of evidence"
 	icon_state = "disposal"
 	anchored = TRUE
 	density = TRUE
@@ -132,12 +133,9 @@
 		return
 
 	if(user.unEquip(I, src))
-		to_chat(user, "You place \the [I] into the [src].")
-		for(var/mob/M in viewers(src))
-			if(M == user)
-				continue
-			M.show_message("[user.name] places \the [I] into the [src].", 3)
-			playsound(src.loc, 'sound/machines/vending_drop.ogg', 100, 1)
+		user.visible_message("[user.name] places \the [I] into \the [src].", \
+			"You place \the [I] into the [src].")
+		playsound(loc, 'sound/machines/vending_drop.ogg', 100, 1)
 
 		update()
 
@@ -218,13 +216,9 @@
 
 		I.add_fingerprint(user)
 		I.forceMove(src)
-		to_chat(user, "You place \the [I] into the [src].")
-		for(var/mob/M in viewers(src))
-			if(M == user)
-				continue
-			M.show_message("[user.name] places \the [I] into the [src].", 3)
-			playsound(src.loc, 'sound/machines/vending_drop.ogg', 100, 1)
-
+		user.visible_message("[user.name] places \the [I] into \the [src].", \
+			"You place \the [I] into the [src].")
+		playsound(loc, 'sound/machines/vending_drop.ogg', 100, 1)
 		update()
 		return
 	. = ..()
@@ -358,7 +352,7 @@
 
 // update the icon & overlays to reflect mode & status
 /obj/machinery/disposal/proc/update()
-	cut_overlays()
+	overlays.Cut()
 	if(stat & BROKEN)
 		icon_state = "disposal-broken"
 		mode = 0
@@ -367,7 +361,7 @@
 
 	// flush handle
 	if(flush)
-		add_overlays(image('icons/obj/pipes/disposal.dmi', "dispover-handle"))
+		overlays += image('icons/obj/pipes/disposal.dmi', "dispover-handle")
 
 	// only handle is shown if no power
 	if(stat & NOPOWER || mode == -1)
@@ -375,13 +369,13 @@
 
 	// 	check for items in disposal - occupied light
 	if(contents.len > 0)
-		add_overlays(image('icons/obj/pipes/disposal.dmi', "dispover-full"))
+		overlays += image('icons/obj/pipes/disposal.dmi', "dispover-full")
 
 	// charging and ready light
 	if(mode == 1)
-		add_overlays(image('icons/obj/pipes/disposal.dmi', "dispover-charge"))
+		overlays += image('icons/obj/pipes/disposal.dmi', "dispover-charge")
 	else if(mode == 2)
-		add_overlays(image('icons/obj/pipes/disposal.dmi', "dispover-ready"))
+		overlays += image('icons/obj/pipes/disposal.dmi', "dispover-ready")
 
 // timed process
 // charge the gas reservoir and perform flush if ready
@@ -431,7 +425,7 @@
 /obj/machinery/disposal/proc/flush()
 
 	flushing = 1
-	FLICK("[icon_state]-flush", src)
+	flick("[icon_state]-flush", src)
 
 	var/wrapcheck = 0
 	var/obj/structure/disposalholder/H = new()	// virtual holder object which actually
@@ -498,18 +492,23 @@
 		qdel(H)
 
 /obj/machinery/disposal/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if (istype(mover,/obj/item) && mover.throwing)
+	if(ishuman(mover) && mover.throwing)
+		var/mob/living/carbon/human/H = mover
+		if(H.stats.getPerk(PERK_SPACE_ASSHOLE))
+			H.forceMove(src)
+			visible_message("[H] dives into \the [src]!")
+			flush = TRUE
+		return
+	else if (istype(mover,/obj/item) && mover.throwing)
 		var/obj/item/I = mover
 		if(istype(I, /obj/item/projectile))
 			return
-		if(prob(75))
-			I.forceMove(src)
-			for(var/mob/M in viewers(src))
-				M.show_message("\The [I] lands in \the [src].", 3)
 		else
-			for(var/mob/M in viewers(src))
-				M.show_message("\The [I] bounces off of \the [src]'s rim!", 3)
-		return 0
+			if(prob(75))
+				I.forceMove(src)
+				visible_message("\The [I] lands in \the [src].")
+			else
+				visible_message("\The [I] bounces off of \the [src]\'s rim!")
 	else
 		return ..(mover, target, height, air_group)
 
@@ -592,7 +591,8 @@
 			for(var/mob/living/H in src)
 				if(isdrone(H)) //Drones use the mailing code to move through the disposal system,
 					continue
-
+				if(H.stats.getPerk(PERK_SPACE_ASSHOLE)) //Assholes gain disposal immunity
+					continue
 				// Hurt any living creature jumping down disposals
 				var/multiplier = 1
 
@@ -897,6 +897,10 @@
 			return
 		if(3)
 			health -= rand(0,15)
+			healthcheck()
+			return
+		if(4)
+			health -= rand(0,5)
 			healthcheck()
 			return
 
@@ -1340,19 +1344,18 @@
 	icon_state = "pipe-t"
 	var/obj/linked 	// the linked obj/machinery/disposal or obj/disposaloutlet
 
-/obj/structure/disposalpipe/trunk/New()
-	..()
+/obj/structure/disposalpipe/trunk/Initialize()
+	. = ..()
 	pipe_dir = dir
-	spawn(1)
-		getlinked()
-
+	
+	INVOKE_ASYNC(src, .proc/getlinked)
 	update()
-	return
 
 /obj/structure/disposalpipe/trunk/Destroy()
 	// Unlink trunk and disposal so that objets are not sent to nullspace
-	var/obj/machinery/disposal/D = linked
-	D.trunk = null
+	if (linked)
+		var/obj/machinery/disposal/D = linked
+		D.trunk = null
 	linked = null
 	return ..()
 
@@ -1480,7 +1483,7 @@
 	// called when the holder exits the outlet
 /obj/structure/disposaloutlet/proc/expel(var/obj/structure/disposalholder/H)
 
-	FLICK("outlet-open", src)
+	flick("outlet-open", src)
 	playsound(src, 'sound/machines/warning-buzzer.ogg', 50, 0, 0)
 	sleep(20)	//wait until correct animation frame
 	playsound(src, 'sound/machines/hiss.ogg', 50, 0, 0)

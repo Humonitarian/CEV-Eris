@@ -135,7 +135,7 @@ var/list/mob_hat_cache = list()
 	additional_law_channels["Drone"] = "d"
 	if(!laws) laws = new law_type
 
-	flavor_text = "It's a tiny little repair drone. The casing is stamped with an corporate logo and the subscript: '[company_name] Recursive Repair Systems: Fixing Tomorrow's Problem, Today!'"
+	flavor_text = "A tiny little repair drone. The casing is stamped with an corporate logo and the subscript: '[company_name] Recursive Repair Systems: Fixing Tomorrow's Problem, Today!'"
 	playsound(src.loc, 'sound/machines/twobeep.ogg', 50, 0)
 
 //Redefining some robot procs...
@@ -152,13 +152,13 @@ var/list/mob_hat_cache = list()
 
 	cut_overlays()
 	if(stat == CONSCIOUS && eyecolor)
-		add_overlays("eyes-drone[eyecolor]")
+		overlays += "eyes-drone[eyecolor]"
 
 	if(armguard)
-		add_overlays("model-[armguard]")
+		overlays += "model-[armguard]"
 
 	if(hat) // Let the drones wear hats.
-		associate_with_overlays(get_hat_icon(hat, hat_x_offset, hat_y_offset))
+		overlays |= get_hat_icon(hat, hat_x_offset, hat_y_offset)
 
 /mob/living/silicon/robot/drone/choose_icon()
 	return
@@ -192,7 +192,7 @@ var/list/mob_hat_cache = list()
 
 		if(stat == 2)
 
-			if(!config.allow_drone_spawn || emagged || health < -35) //It's dead, Dave.
+			if(!config.allow_drone_spawn || HasTrait(CYBORG_TRAIT_EMAGGED) || health < -35) //It's dead, Dave.
 				to_chat(user, SPAN_DANGER("The interface is fried, and a distressing burned smell wafts from the robot's interior. You're not rebooting this one."))
 				return
 
@@ -207,7 +207,7 @@ var/list/mob_hat_cache = list()
 		else
 			user.visible_message(SPAN_DANGER("\The [user] swipes \his ID card through \the [src], attempting to shut it down."), SPAN_DANGER("You swipe your ID card through \the [src], attempting to shut it down."))
 
-			if(emagged)
+			if(HasTrait(CYBORG_TRAIT_EMAGGED))
 				return
 
 			if(allowed(usr))
@@ -224,7 +224,7 @@ var/list/mob_hat_cache = list()
 		to_chat(user, SPAN_DANGER("There's not much point subverting this heap of junk."))
 		return
 
-	if(emagged)
+	if(HasTrait(CYBORG_TRAIT_EMAGGED))
 		to_chat(src, SPAN_DANGER("\The [user] attempts to load subversive software into you, but your hacked subroutines ignore the attempt."))
 		to_chat(user, SPAN_DANGER("You attempt to subvert [src], but the sequencer has no effect."))
 		return
@@ -237,7 +237,7 @@ var/list/mob_hat_cache = list()
 	var/time = time2text(world.realtime,"hh:mm:ss")
 	lawchanges.Add("[time] <B>:</B> [user.name]([user.key]) emagged [name]([key])")
 
-	emagged = 1
+	AddTrait(CYBORG_TRAIT_EMAGGED)
 	lawupdate = 0
 	connected_ai = null
 	clear_supplied_laws()
@@ -280,7 +280,7 @@ var/list/mob_hat_cache = list()
 //CONSOLE PROCS
 /mob/living/silicon/robot/drone/proc/law_resync()
 	if(stat != 2)
-		if(emagged)
+		if(HasTrait(CYBORG_TRAIT_EMAGGED))
 			to_chat(src, SPAN_DANGER("You feel something attempting to modify your programming, but your hacked subroutines are unaffected."))
 		else
 			to_chat(src, SPAN_DANGER("A reset-to-factory directive packet filters through your data connection, and you obediently modify your programming to suit it."))
@@ -289,7 +289,7 @@ var/list/mob_hat_cache = list()
 
 /mob/living/silicon/robot/drone/proc/shut_down()
 	if(stat != 2)
-		if(emagged)
+		if(HasTrait(CYBORG_TRAIT_EMAGGED))
 			to_chat(src, SPAN_DANGER("You feel a system kill order percolate through your tiny brain, but it doesn't seem like a good idea to you."))
 		else
 			to_chat(src, SPAN_DANGER("You feel a system kill order percolate through your tiny brain, and you obediently destroy yourself."))

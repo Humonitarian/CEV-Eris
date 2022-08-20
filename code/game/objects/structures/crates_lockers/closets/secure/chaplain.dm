@@ -27,12 +27,7 @@
 	new /obj/item/storage/fancy/candle_box(src)
 	new /obj/item/deck/tarot(src)
 	new /obj/item/storage/box/headset/church
-	for (var/i in 1 to 10)
-		new /obj/item/implant/core_implant/cruciform(src)
 	new /obj/item/tool/knife/neotritual(src)
-	new /obj/item/gun/energy/nt_svalinn(src)
-	new /obj/item/cell/small/neotheology/plasma(src)
-	new /obj/item/cell/small/neotheology/plasma(src)
 	new /obj/item/tool/sword/nt/longsword(src)
 	new /obj/item/tool/knife/dagger/nt(src)
 	new /obj/item/storage/box/ids(src)

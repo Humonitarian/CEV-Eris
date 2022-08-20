@@ -1,6 +1,8 @@
 /obj/structure/railing
 	name = "orange railing"
 	desc = "A standard steel railing painted in copper color. Prevents stupid people from falling to their doom."
+	description_info = "Can be deconstructed by screwing and wrenching."
+	description_antag = "Hopping above these leaves fingerprints. You can also grab a person and throw them over the ledge instantly."
 	icon = 'icons/obj/railing.dmi'
 	density = TRUE
 	throwpass = TRUE
@@ -135,7 +137,7 @@
 			if (UpdateNeighbors)
 				R.update_icon(0)
 
-/obj/structure/railing/on_update_icon(var/UpdateNeighbors = 1)
+/obj/structure/railing/update_icon(var/UpdateNeighbors = 1)
 	NeighborsCheck(UpdateNeighbors)
 	cut_overlays()
 	if (!check || !anchored)
@@ -144,21 +146,21 @@
 		icon_state = "[icon_modifier][reinforced ? "reinforced_": null]railing1"
 		//left side
 		if (check & 32)
-			add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]corneroverlay"))
+			overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]corneroverlay")
 		if ((check & 16) || !(check & 32) || (check & 64))
-			add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]frontoverlay_l"))
+			overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]frontoverlay_l")
 		if (!(check & 2) || (check & 1) || (check & 4))
-			add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]frontoverlay_r"))
+			overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]frontoverlay_r")
 			if(check & 4)
 				switch (src.dir)
 					if (NORTH)
-						add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_x = 32))
+						overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_x = 32)
 					if (SOUTH)
-						add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_x = -32))
+						overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_x = -32)
 					if (EAST)
-						add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_y = -32))
+						overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_y = -32)
 					if (WEST)
-						add_overlays(image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_y = 32))
+						overlays += image ('icons/obj/railing.dmi', src, "[icon_modifier]mcorneroverlay", pixel_y = 32)
 
 /obj/structure/railing/verb/rotate()
 	set name = "Rotate Railing Counter-Clockwise"
@@ -341,6 +343,16 @@
 			return
 		else
 	return
+
+/obj/structure/railing/attack_generic(mob/M, damage, attack_message)
+	if(damage)
+		M.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		M.do_attack_animation(src)
+		M.visible_message(SPAN_DANGER("\The [M] [attack_message] \the [src]!"))
+		playsound(loc, 'sound/effects/metalhit2.ogg', 50, 1)
+		take_damage(damage)
+	else
+		attack_hand(M)
 
 /obj/structure/railing/do_climb(var/mob/living/user)
 	if(!can_climb(user))

@@ -110,9 +110,9 @@
 				continue
 		if(H && H.mind && H.mind.key && H.stat == DEAD)
 			var/mob/M = key2mob(H.mind.key)
-			to_chat(M, SPAN_NOTICE("Your remains have been dissolved and reused. Your crew respawn time is reduced by 10 minutes."))
+			to_chat(M, SPAN_NOTICE("Your remains have been dissolved and reused. Your crew respawn time is reduced by [(BIOREACTOR_RESPAWN_BONUS)/600] minutes."))
 			M << 'sound/effects/magic/blind.ogg'  //Play this sound to a player whenever their respawn time gets reduced
-			M.set_respawn_bonus("CORPSE_DISSOLVING", 10 MINUTES)
+			M.set_respawn_bonus("CORPSE_DISSOLVING", BIOREACTOR_RESPAWN_BONUS)
 		
 	qdel(object)
 	//now let's add some dirt to the glass
@@ -123,7 +123,7 @@
 		playsound(loc, 'sound/effects/bubbles.ogg', 50, 1)
 
 
-/obj/machinery/multistructure/bioreactor_part/platform/on_update_icon()
+/obj/machinery/multistructure/bioreactor_part/platform/update_icon()
 	var/corner_dir = 0		//used at sprite determination, direction point to center of whole bioreactor chamber
 	for(var/direction in cardinal)
 		if(locate(type) in get_step(src, direction))
@@ -206,8 +206,8 @@
 			to_chat(user, SPAN_NOTICE("This [src] is so clean, that you can see your reflection. Is that something green at your teeth?"))
 
 
-/obj/structure/window/reinforced/bioreactor/on_update_icon()
-	cut_overlays()
+/obj/structure/window/reinforced/bioreactor/update_icon()
+	overlays.Cut()
 	..()
 	if(contamination_level)
 		var/biomass_alpha = min((50*contamination_level), 255)
@@ -216,7 +216,7 @@
 		biomass.Turn(-40, 40)
 		biomass.Blend(rgb(0, 0, 0, biomass_alpha))
 		default.Blend(biomass, ICON_MULTIPLY)
-		add_overlays(default)
+		overlays += default
 
 
 /obj/structure/window/reinforced/bioreactor/proc/apply_dirt(var/amount)

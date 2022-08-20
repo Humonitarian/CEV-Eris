@@ -16,6 +16,8 @@
 	charge_meter = 0
 	charge_cost = 200
 	price_tag = 2500
+	init_recoil = HANDGUN_RECOIL(1)
+	serial_type = "S"
 
 
 /obj/item/gun/energy/crossbow/ninja
@@ -26,7 +28,8 @@
 
 /obj/item/gun/energy/crossbow/largecrossbow
 	name = "NT EC \"Themis\""
-	desc = "Energy crossbow, produced by NeoTheology. A weapon favored by inquisitorial infiltration teams."
+	desc = "Energy crossbow, produced by NeoTheology. A weapon favored by inquisitorial infiltration teams. \
+            There\'s an inscription on the stock. \'The guilty will be recognized by their mark; so they will be seized by their forelocks and feet.\'"
 	icon = 'icons/obj/guns/energy/constantine.dmi'
 	icon_state = "constantine"
 	w_class = ITEM_SIZE_BULKY
@@ -34,3 +37,5 @@
 	matter = list(MATERIAL_PLASTEEL = 35, MATERIAL_PLASTIC = 20, MATERIAL_SILVER = 9, MATERIAL_URANIUM = 9)
 	projectile_type = /obj/item/projectile/energy/bolt/large
 	price_tag = 4000
+	serial_type = "NT"
+	init_recoil = RIFLE_RECOIL(1)

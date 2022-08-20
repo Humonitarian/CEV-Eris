@@ -7,6 +7,8 @@ var/global/excelsior_last_draft = 0
 /obj/machinery/complant_teleporter
 	name = "excelsior long-range teleporter"
 	desc = "A powerful teleporter that allows shipping matter in and out. Takes a long time to charge."
+	description_info = "A highly illegal teleporter. Uses huge amounts of power and will always show in the powergrid monitor"
+	description_antag = "The excelcior's main way of obtaining resources, calling reinforcements and unleashing the revolution"
 	density = TRUE
 	anchored = TRUE
 	icon = 'icons/obj/machines/excelsior/teleporter.dmi'
@@ -82,7 +84,7 @@ var/global/excelsior_last_draft = 0
 		man_rating += M.rating
 		entropy_value = initial(entropy_value)/M.rating
 		man_amount++
-	
+
 	// +50% speed for each upgrade tier
 	var/coef = 1 + (((man_rating / man_amount) - 1) / 2)
 
@@ -100,11 +102,11 @@ var/global/excelsior_last_draft = 0
 			energy_gain *= 2
 
 
-/obj/machinery/complant_teleporter/on_update_icon()
-	cut_overlays()
+/obj/machinery/complant_teleporter/update_icon()
+	overlays.Cut()
 
 	if(panel_open)
-		add_overlays(image("panel"))
+		overlays += image("panel")
 
 	if(stat & (BROKEN|NOPOWER))
 		icon_state = "off"
@@ -128,10 +130,10 @@ var/global/excelsior_last_draft = 0
 	if(excelsior_energy < (excelsior_max_energy - energy_gain))
 		excelsior_energy += energy_gain
 		SSnano.update_uis(src)
-		use_power = ACTIVE_POWER_USE
+		set_power_use(ACTIVE_POWER_USE)
 	else
 		excelsior_energy = excelsior_max_energy
-		use_power = IDLE_POWER_USE
+		set_power_use(IDLE_POWER_USE)
 
 
 /obj/machinery/complant_teleporter/ex_act(severity)
@@ -270,7 +272,7 @@ var/global/excelsior_last_draft = 0
 
 	processing_order = TRUE
 	excelsior_energy = max(excelsior_energy - order_cost, 0)
-	FLICK("teleporting", src)
+	flick("teleporting", src)
 	spawn(17)
 		complete_order(order_path, amount)
 
@@ -287,7 +289,7 @@ var/global/excelsior_last_draft = 0
 		if(M.target_type == I.type)
 			I.Destroy()
 			M.complete(user)
-			FLICK("teleporting", src)
+			flick("teleporting", src)
 	..()
 
 /obj/machinery/complant_teleporter/attack_hand(mob/user)
@@ -337,12 +339,13 @@ var/global/excelsior_last_draft = 0
 	visible_message("\the [src] blinks, refusing [affecting].")
 	playsound(src.loc, 'sound/machines/ping.ogg', 50, 1, -3)
 /obj/machinery/complant_teleporter/proc/teleport_out(var/mob/living/affecting, var/mob/living/user)
-	FLICK("teleporting", src)
-	to_chat(affecting, SPAN_NOTICE("You have been teleported to haven, your crew respawn time is reduced by 15 minutes."))
+	flick("teleporting", src)
+	to_chat(affecting, SPAN_NOTICE("You have been teleported to haven, your crew respawn time is reduced by [(COLLECTIVISED_RESPAWN_BONUS)/600] minutes."))
 	visible_message("\the [src] teleporter closes and [affecting] disapears.")
-	affecting.set_respawn_bonus("TELEPORTED_TO_EXCEL", 15 MINUTES)
+	affecting.set_respawn_bonus("TELEPORTED_TO_EXCEL", COLLECTIVISED_RESPAWN_BONUS)
 	affecting << 'sound/effects/magic/blind.ogg'  //Play this sound to a player whenever their respawn time gets reduced
 	qdel(affecting)
+
 /obj/machinery/complant_teleporter/proc/request_reinforcements(var/mob/living/user)
 
 	if(excelsior_energy < reinforcements_cost)
@@ -356,7 +359,7 @@ var/global/excelsior_last_draft = 0
 		return
 	processing_order = TRUE
 	use_power(active_power_usage * 10)
-	FLICK("teleporting", src)
+	flick("teleporting", src)
 	var/mob/observer/ghost/candidate = draft_ghost("Excelsior Conscript", ROLE_BANTYPE_EXCELSIOR, ROLE_EXCELSIOR_REV)
 	if(!candidate)
 		processing_order = FALSE

@@ -38,8 +38,8 @@
 	caliber = CAL_DART
 	ammo_type = /obj/item/ammo_casing/chemdart
 	max_ammo = 5
-	multiple_sprites = 1
 	mag_well = MAG_WELL_DART
+	ammo_states = list(1, 2, 3, 4, 5)
 
 /obj/item/gun/projectile/dartgun
 	name = "Z-H P Artemis"
@@ -51,7 +51,7 @@
 	fire_sound_text = "a metallic click"
 	matter = list(MATERIAL_STEEL = 20, MATERIAL_PLASTIC = 10)
 	gun_parts = list(/obj/item/stack/material/steel = 15 ,/obj/item/stack/material/plastic = 2)
-	recoil_buildup = 0
+	init_recoil = SMG_RECOIL(1)
 	silenced = TRUE
 	load_method = MAGAZINE
 	magazine_type = /obj/item/ammo_magazine/chemdart
@@ -75,7 +75,7 @@
 			beakers += B
 	update_icon()
 
-/obj/item/gun/projectile/dartgun/on_update_icon()
+/obj/item/gun/projectile/dartgun/update_icon()
 	..()
 	if(ammo_magazine)
 		icon_state = "dartgun-[round(ammo_magazine.stored_ammo.len,2)]"

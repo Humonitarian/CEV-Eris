@@ -32,11 +32,14 @@ var/list/mechtoys = list(
 	anchored = TRUE
 	layer = ABOVE_MOB_LAYER
 	explosion_resistance = 5
+	matter = list(MATERIAL_PLASTIC = 4)
 	var/list/mobs_can_pass = list(
 		/mob/living/carbon/slime,
 		/mob/living/simple_animal/mouse,
 		/mob/living/silicon/robot/drone
 		)
+
+	atmos_canpass = CANPASS_PROC
 
 /obj/structure/plasticflaps/CanPass(atom/A, turf/T)
 	if(istype(A) && A.checkpass(PASSGLASS))
@@ -70,6 +73,21 @@ var/list/mechtoys = list(
 		if (3)
 			if (prob(5))
 				qdel(src)
+
+/obj/structure/plasticflaps/attackby(obj/item/I, mob/user)
+	if((QUALITY_BOLT_TURNING in I.tool_qualities) && (!istype(src, /obj/structure/plasticflaps/mining)))
+		user.visible_message(
+				SPAN_NOTICE("\The [user] start disassembling \the [src]."),
+				SPAN_NOTICE("You start disassembling \the [src].")
+		)
+		if(I.use_tool(user, src, WORKTIME_FAST, QUALITY_BOLT_TURNING, FAILCHANCE_NORMAL, required_stat = STAT_MEC))
+			user.visible_message(
+				SPAN_NOTICE("\The [user] disassembled \the [src]!"),
+				SPAN_NOTICE("You disassembled \the [src]!")
+			)
+			drop_materials(drop_location(), user)
+			qdel(src)
+	return ..()
 
 /obj/structure/plasticflaps/mining //A specific type for mining that doesn't allow airflow because of them damn crates
 	name = "airtight plastic flaps"

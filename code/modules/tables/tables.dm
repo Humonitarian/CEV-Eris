@@ -15,7 +15,7 @@ var/list/custom_table_appearance = list(
 	name = "table frame"
 	icon = 'icons/obj/tables.dmi'
 	icon_state = "frame"
-	desc = "It's a table, for putting things on. Or standing on, if you really want to."
+	desc = "A table, for putting things on. Or standing on, if you really want to."
 	density = TRUE
 	anchored = TRUE
 	climbable = 1
@@ -102,7 +102,7 @@ var/list/custom_table_appearance = list(
 		var/mob/living/L = mover
 		if(L.weakened)
 			return 1
-	return ..()	
+	return ..()
 
 /obj/structure/table/examine(mob/user)
 	. = ..()
@@ -233,11 +233,21 @@ var/list/custom_table_appearance = list(
 		to_chat(user, SPAN_WARNING("Put \the [src] back in place before reinforcing it!"))
 		return
 
-	reinforced = common_material_add(S, user, "reinforc")
+	reinforced = common_material_add(S, user, "reinforce")
 	if(reinforced)
 		update_desc()
 		update_icon()
 		update_material()
+
+/obj/structure/table/attack_generic(mob/M, damage, attack_message)
+	if(damage)
+		M.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		M.do_attack_animation(src)
+		M.visible_message(SPAN_DANGER("\The [M] [attack_message] \the [src]!"))
+		playsound(loc, 'sound/effects/metalhit2.ogg', 50, 1)
+		take_damage(damage)
+	else
+		attack_hand(M)
 
 /obj/structure/table/proc/update_desc()
 	if(custom_appearance)
@@ -324,17 +334,17 @@ var/list/custom_table_appearance = list(
 	qdel(src)
 	return shards
 
-/obj/structure/table/on_update_icon()
+/obj/structure/table/update_icon()
 	if(flipped != 1)
 		icon_state = "blank"
-		cut_overlays()
+		overlays.Cut()
 
 		var/image/I
 
 		// Base frame shape. Mostly done for glass/diamond tables, where this is visible.
 		for(var/i = 1 to 4)
 			I = image(icon, dir = 1<<(i-1), icon_state = connections[i])
-			add_overlays(I)
+			overlays += I
 
 		//If there no any custom appearance or its an overlay, we use standard images
 		if(!custom_appearance || (custom_appearance && !(custom_appearance[4] == CUSTOM_TABLE_ICON_REPLACE)))
@@ -345,23 +355,23 @@ var/list/custom_table_appearance = list(
 						I = image(icon, "glass_[connections[i]]", dir = 1<<(i-1))
 						if(material.icon_colour)
 							I.color = material.icon_colour
-						add_overlays(I)
+						overlays += I
 						var/material/glass/G = material
 						if (G.is_reinforced())
 							I = image(icon, "rglass_[connections[i]]", dir = 1<<(i-1))
-							add_overlays(I)
+							overlays += I
 
 				else if (istype(material, /material/wood))
 					for(var/i = 1 to 4)
 						I = image(icon, "wood_[connections[i]]", dir = 1<<(i-1))
-						add_overlays(I)
+						overlays += I
 
 				else
 					for(var/i = 1 to 4)
 						I = image(icon, "[material.icon_base]_[connections[i]]", dir = 1<<(i-1))
 						if(material.icon_colour) I.color = material.icon_colour
 						I.alpha = 255 * material.opacity
-						add_overlays(I)
+						overlays += I
 
 			// Reinforcements
 			if(reinforced)
@@ -369,14 +379,14 @@ var/list/custom_table_appearance = list(
 					I = image(icon, "[reinforced.icon_reinf]_[connections[i]]", dir = 1<<(i-1))
 					I.color = material.icon_colour
 					I.alpha = 255 * reinforced.opacity
-					add_overlays(I)
+					overlays += I
 		//Custom appearance
 		if(custom_appearance)
 			for(var/i = 1 to 4)
 				I = image(icon, "[custom_appearance[3]]_[connections[i]]", dir = 1<<(i-1))
-				add_overlays(I)
+				overlays += I
 	else
-		cut_overlays()
+		overlays.Cut()
 		var/type = 0
 		var/tabledirs = 0
 		for(var/direction in list(turn(dir,90), turn(dir,-90)) )
@@ -395,16 +405,16 @@ var/list/custom_table_appearance = list(
 		icon_state = "flip[type]"
 		if(custom_appearance && custom_appearance[4] == CUSTOM_TABLE_ICON_REPLACE)
 			var/image/I = image(icon, "[custom_appearance[3]]_flip[type]")
-			add_overlays(I)
+			overlays += I
 		else if(material)
 			if (istype(material, /material/wood))
 				var/image/I = image(icon, "wood_flip[type]")
-				add_overlays(I)
+				overlays += I
 			else
 				var/image/I = image(icon, "[material.icon_base]_flip[type]")
 				I.color = material.icon_colour
 				I.alpha = 255 * material.opacity
-				add_overlays(I)
+				overlays += I
 			name = "[material.display_name] table"
 		else
 			name = "table frame"
@@ -413,10 +423,10 @@ var/list/custom_table_appearance = list(
 			var/image/I = image(icon, "[reinforced.icon_reinf]_flip[type]")
 			I.color = reinforced.icon_colour
 			I.alpha = 255 * reinforced.opacity
-			add_overlays(I)
+			overlays += I
 
 		if(custom_appearance && custom_appearance[4] == CUSTOM_TABLE_COVERING)
-			add_overlays("[custom_appearance[3]]_flip[type]")
+			overlays += "[custom_appearance[3]]_flip[type]"
 
 // set propagate if you're updating a table that should update tables around it too, for example if it's a new table or something important has changed (like material).
 /obj/structure/table/proc/update_connections(propagate=0)

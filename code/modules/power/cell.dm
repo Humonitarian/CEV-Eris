@@ -5,6 +5,7 @@
 /obj/item/cell //Basic type of the cells, should't be used by itself
 	name = "power cell"
 	desc = "A rechargable electrochemical power cell."
+	description_antag = "Can be inserted with plasma to make it blow whenever power is being pulled."
 	icon = 'icons/obj/power_cells.dmi'
 	icon_state = "b_st"
 	item_state = "cell"
@@ -72,7 +73,7 @@
 
 	return use(cell_amt) / CELLRATE
 
-/obj/item/cell/on_update_icon()
+/obj/item/cell/update_icon()
 	var/charge_status
 	var/c = charge/maxcharge
 	if (c >=0.95)
@@ -91,7 +92,7 @@
 
 	cut_overlays()
 	if (charge_status != null)
-		add_overlays(image('icons/obj/power_cells.dmi', "[icon_state]_[charge_status]"))
+		overlays += image('icons/obj/power_cells.dmi', "[icon_state]_[charge_status]")
 
 	last_charge_status = charge_status
 
@@ -234,6 +235,9 @@
 			if (prob(25))
 				qdel(src)
 				return
+			if (prob(25))
+				corrupt()
+		if(4)
 			if (prob(25))
 				corrupt()
 	return

@@ -23,7 +23,6 @@
 
 	// Vars for hacking
 	var/datum/wires/jukebox/wires
-	var/hacked = FALSE // Whether to show the hidden songs or not
 	var/freq = 0 // Currently no effect, will return in phase II of mediamanager.
 
 	var/loop_mode = JUKEMODE_PLAY_ONCE			// Behavior when finished playing a song
@@ -178,8 +177,8 @@
 		StopPlaying()
 	update_icon()
 
-/obj/machinery/media/jukebox/on_update_icon()
-	cut_overlays()
+/obj/machinery/media/jukebox/update_icon()
+	overlays.Cut()
 	if(stat & (NOPOWER|BROKEN) || !anchored)
 		if(stat & BROKEN)
 			icon_state = "[state_base]-broken"
@@ -189,11 +188,11 @@
 	icon_state = state_base
 	if(playing)
 		if(emagged)
-			add_overlays("[state_base]-emagged")
+			overlays += "[state_base]-emagged"
 		else
-			add_overlays("[state_base]-running")
+			overlays += "[state_base]-running"
 	if (panel_open)
-		add_overlays("panel_open")
+		overlays += "panel_open"
 
 /obj/machinery/media/jukebox/Topic(href, href_list)
 	if(..() || !(Adjacent(usr) || issilicon(usr)))
@@ -230,8 +229,8 @@
 				if(ishuman(M))
 					if(istype(M:l_ear, /obj/item/clothing/ears/earmuffs) || istype(M:r_ear, /obj/item/clothing/ears/earmuffs))
 						ear_safety += 2
-					if(HULK in M.mutations)
-						ear_safety += 1
+//					if(HULK in M.mutations)
+//						ear_safety += 1
 					if(istype(M:head, /obj/item/clothing/head/armor/helmet))
 						ear_safety += 1
 					if(M.stats.getPerk(PERK_EAR_OF_QUICKSILVER))

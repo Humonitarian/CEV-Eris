@@ -16,16 +16,20 @@
 	matter = list(MATERIAL_PLASTEEL = 20, MATERIAL_PLASTIC = 12)
 	price_tag = 2300
 	auto_eject_sound = 'sound/weapons/smg_empty_alarm.ogg'
-	recoil_buildup = 2
+	init_recoil = CARBINE_RECOIL(1)
 	penetration_multiplier = 1.1
 	damage_multiplier = 1.15
-	one_hand_penalty = 8 //because otherwise you can shoot it one-handed in bursts and still be very accurate. One-handed recoil is now as much as it was back in the day when wielded.
 	gun_parts = list(/obj/item/part/gun = 2 ,/obj/item/stack/material/plasteel = 6)
+	gun_tags = list(GUN_FA_MODDABLE)
+
 	init_firemodes = list(
-		SEMI_AUTO_NODELAY,
-		BURST_3_ROUND
+		SEMI_AUTO_300,
+		BURST_3_ROUND,
+		BURST_3_ROUND_RAPID
 		)
 	spawn_tags = SPAWN_TAG_FS_PROJECTILE
+	gun_parts = list(/obj/item/part/gun/frame/sol = 1, /obj/item/part/gun/grip/rubber = 1, /obj/item/part/gun/mechanism/smg = 1, /obj/item/part/gun/barrel/clrifle = 1)
+	serial_type = "FS"
 
 /obj/item/gun/projectile/automatic/sol/proc/update_charge()
 	if(!ammo_magazine)
@@ -34,9 +38,9 @@
 	if(ratio < 0.25 && ratio != 0)
 		ratio = 0.25
 	ratio = round(ratio, 0.25) * 100
-	add_overlays("sol_[ratio]")
+	overlays += "sol_[ratio]"
 
-/obj/item/gun/projectile/automatic/sol/on_update_icon()
+/obj/item/gun/projectile/automatic/sol/update_icon()
 	..()
 
 	icon_state = initial(icon_state) + (ammo_magazine ? "-full" : "")
@@ -44,6 +48,11 @@
 	cut_overlays()
 	update_charge()
 
-/obj/item/gun/projectile/automatic/sol/generate_guntags()
-	..()
-	gun_tags |= GUN_SOL
+/obj/item/part/gun/frame/sol
+	name = "Sol frame"
+	desc = "A Sol carbine frame. Ironhammer's favorite."
+	icon_state = "frame_ihbullpup"
+	result = /obj/item/gun/projectile/automatic/sol
+	grip = /obj/item/part/gun/grip/rubber
+	mechanism = /obj/item/part/gun/mechanism/smg
+	barrel = /obj/item/part/gun/barrel/clrifle

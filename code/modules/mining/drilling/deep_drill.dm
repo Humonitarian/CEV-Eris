@@ -1,15 +1,26 @@
-#define RADIUS 7
+#define RADIUS 4
 #define DRILL_COOLDOWN 1 MINUTE
+
+/obj/machinery/mining
+	icon = 'icons/obj/mining_drill.dmi'
+	anchored = FALSE
+	use_power = NO_POWER_USE //The drill takes power directly from a cell.
+	density = TRUE
+	layer = MOB_LAYER+0.1 //So it draws over mobs in the tile north of it.
 
 /obj/machinery/mining/deep_drill
 	name = "deep mining drill head"
 	desc = "An enormous drill to dig out deep ores."
 	icon_state = "mining_drill"
+	pixel_x = -16
 
 	circuit = /obj/item/electronics/circuitboard/miningdrill
 
-	var/max_health = 1000
-	var/health = 1000
+	var/max_health = 2000
+	var/health = 2000
+
+	var/last_update = 0
+	var/list/stored_ore = list()
 
 	var/active = FALSE
 	var/list/resource_field = list()
@@ -99,7 +110,7 @@
 	var/total_harvest = harvest_speed //Ore harvest-per-tick.
 	var/found_resource = FALSE
 
-	for(var/metal in ore_types)
+	for(var/metal in shuffle(ore_types))
 
 		if(contents.len >= capacity)
 			system_error("insufficient storage space")
@@ -136,7 +147,14 @@
 /obj/machinery/mining/deep_drill/attackby(obj/item/I, mob/user as mob)
 
 	if(!active)
-		if(default_deconstruction(I, user))
+		var/tool_type = I.get_tool_type(user, list(QUALITY_SCREW_DRIVING), src)
+		if(tool_type == QUALITY_SCREW_DRIVING)
+			var/used_sound = panel_open ? 'sound/machines/Custom_screwdriveropen.ogg' :  'sound/machines/Custom_screwdriverclose.ogg'
+			if(I.use_tool(user, src, WORKTIME_NEAR_INSTANT, tool_type, FAILCHANCE_VERY_EASY, required_stat = STAT_MEC, instant_finish_tier = 30, forced_sound = used_sound))
+				updateUsrDialog()
+				panel_open = !panel_open
+				to_chat(user, SPAN_NOTICE("You [panel_open ? "open" : "close"] the maintenance hatch of \the [src] with [I]."))
+				update_icon()
 			return
 
 		if(default_part_replacement(I, user))
@@ -181,7 +199,12 @@
 		if(I.use_tool(user, src, WORKTIME_LONG, QUALITY_WELDING, FAILCHANCE_EASY, required_stat = STAT_ROB))
 			playsound(src, 'sound/items/Welder.ogg', 100, 1)
 			to_chat(user, "<span class='notice'>You finish repairing the damage to [src].</span>")
-			take_damage(-damage)
+			if(damage < 0.33 * max_health)
+				take_damage(-damage)  // Completely repair the drill
+			else if(damage < 0.66 * max_health)
+				take_damage(-(0.66 * max_health - health))  // Repair the drill to 66 percents
+			else
+				take_damage(-(0.33 * max_health - health))  // Repair the drill to 33 percents
 		return
 
 	if(!panel_open || active)
@@ -243,7 +266,7 @@
 
 	update_icon()
 
-/obj/machinery/mining/deep_drill/on_update_icon()
+/obj/machinery/mining/deep_drill/update_icon()
 	if(need_player_check)
 		icon_state = "mining_drill_error"
 	else if(active)
@@ -337,16 +360,34 @@
 			explosion(O, -1, 1, 4, 10)
 			qdel(src)
 
+/obj/machinery/mining/deep_drill/proc/update_ore_count()
+	stored_ore = list()
+	for(var/obj/item/ore/O in contents)
+		if(stored_ore[O.name])
+			stored_ore[O.name]++
+		else
+			stored_ore[O.name] = 1
+
 /obj/machinery/mining/deep_drill/examine(mob/user)
 	. = ..()
 	if(health <= 0)
 		to_chat(user, "\The [src] is wrecked.")
-	else if(health < max_health * 0.25)
+	else if(health < max_health * 0.33)
 		to_chat(user, "<span class='danger'>\The [src] looks like it's about to break!</span>")
-	else if(health < max_health * 0.5)
+	else if(health < max_health * 0.66)
 		to_chat(user, "<span class='danger'>\The [src] looks seriously damaged!</span>")
-	else if(health < max_health * 0.75)
+	else if(health < max_health)
 		to_chat(user, "\The [src] shows signs of damage!")
+	else
+		to_chat(user, "\The [src] is in pristine condition.")
+
+	if(world.time > last_update + 1 SECONDS)
+		update_ore_count()
+		last_update = world.time
+
+	to_chat(user, "It holds:")
+	for(var/obj/item/ore/O in contents)
+		to_chat(user, "- [stored_ore[O]] [O]")
 
 /obj/machinery/mining/deep_drill/verb/unload()
 	set name = "Unload Drill"

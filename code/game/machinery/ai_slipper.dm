@@ -1,6 +1,7 @@
 /obj/machinery/ai_slipper
 	name = "\improper AI Liquid Dispenser"
 	icon = 'icons/obj/device.dmi'
+	description_info = "Will slip anyone that doesn't have no-slips or magboots"
 	icon_state = "motion0"
 	plane = FLOOR_PLANE
 	layer = PROJECTILE_HIT_THRESHHOLD_LAYER
@@ -25,7 +26,7 @@
 	..()
 	update_icon()
 
-/obj/machinery/ai_slipper/on_update_icon()
+/obj/machinery/ai_slipper/update_icon()
 	if (stat & NOPOWER || stat & BROKEN)
 		icon_state = "motion0"
 	else
