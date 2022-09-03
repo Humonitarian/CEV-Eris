@@ -82,6 +82,8 @@
 
 #define isitem(A) istype(A, /obj/item)
 
+#define isProjectile(A) istype(A, /obj/item/projectile)
+
 #define isorgan(A) istype(A, /obj/item/organ/external)
 
 #define isgun(A) istype(A, /obj/item/gun)

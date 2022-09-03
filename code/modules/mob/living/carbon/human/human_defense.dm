@@ -127,6 +127,9 @@ meteor_act
 
 	..(stun_amount, agony_amount, def_zone)
 
+/mob/living/carbon/human/getFleshCover()
+	return (maxHealth + stats.getStat(STAT_TGH)) / 5
+
 /mob/living/carbon/human/getarmor(var/def_zone, var/type)
 	var/armorval = 0
 	var/total = 0

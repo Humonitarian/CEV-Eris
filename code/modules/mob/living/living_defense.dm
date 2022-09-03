@@ -17,7 +17,8 @@
 	else
 		show_message(msg1, 1)
 
-/mob/living/proc/damage_through_armor(var/damage = 0, var/damagetype = BRUTE, var/def_zone, var/attack_flag = ARMOR_MELEE, var/armour_divisor = 1, var/used_weapon, var/sharp = FALSE, var/edge = FALSE, var/wounding_multiplier = 1, var/list/dmg_types = list())
+// Returns damage values reduced by worn/used armor
+/mob/living/proc/damage_armor_penetration(var/damage = 0, var/damagetype = BRUTE, var/def_zone, var/attack_flag = ARMOR_MELEE, var/armour_divisor = 1, var/used_weapon, var/sharp = FALSE, var/edge = FALSE, var/wounding_multiplier = 1, var/list/dmg_types = list(), var/flesh_wound = TRUE)
 
 	if(damage) // If damage is defined, we add it to the list
 		if(!dmg_types[damagetype])
@@ -46,53 +47,31 @@
 	for(var/dmg_type in dmg_types)
 		var/dmg = dmg_types[dmg_type]
 		if(dmg)
-			var/dmg_armor_difference // Used for agony calculation, as well as reduction in armour before follow-up attacks
+			var/used_armor = 0 // Used for agony calculation, as well as reduction in armour before follow-up attacks
 
 			if(dmg_type in list(BRUTE, BURN, TOX, BLAST)) // Some damage types do not help penetrate armor
 				if(remaining_armor)
-					dmg_armor_difference = dmg - remaining_armor
+					var/dmg_armor_difference = dmg - remaining_armor
+					used_armor += dmg_armor_difference ? dmg - dmg_armor_difference : dmg
 					remaining_armor = dmg_armor_difference ? 0 : -dmg_armor_difference
 					dmg = dmg_armor_difference ? dmg_armor_difference : 0
 
 				if(remaining_ablative && dmg)
 					var/ablative_difference
 					ablative_difference = dmg - remaining_ablative
+					used_armor += ablative_difference ? dmg - ablative_difference : dmg
 					remaining_ablative = ablative_difference ? 0 : -ablative_difference
 					dmg = ablative_difference ? ablative_difference : 0
-					dmg_armor_difference += ablative_difference
 			else
 				dmg = max(dmg - remaining_armor - remaining_ablative, 0)
-
+			if(!(dmg_type == HALLOSS)) // Determine pain from impact
+				adjustHalLoss(used_armor * ARMOR_HALLOS_COEFFICIENT * max(0.5, (get_specific_organ_efficiency(OP_NERVE, def_zone) / 100)))
 			if(dmg)
 				dealt_damage += dmg
-				dmg *= dmg_type == HALLOSS ? 1 : wounding_multiplier
-
-				if(dmg_type == HALLOSS)
-					dmg = round(dmg * max(0.5, (get_specific_organ_efficiency(OP_NERVE, def_zone) / 100)))
-				else if(dmg_armor_difference)
-					adjustHalLoss(dmg_armor_difference * ARMOR_HALLOS_COEFFICIENT * max(0.5, (get_specific_organ_efficiency(OP_NERVE, def_zone) / 100)))
-				if(dmg_type == BRUTE)
-
-					if ( (sharp || edge) && prob ( (1 - dmg / dmg_types[dmg_type]) * 100 ) ) // If enough of the brute damage is blocked, sharpness is lost from all followup attacks
-						sharp = FALSE
-						edge = FALSE
-
-					if(ishuman(src) && isitem(used_weapon))
-						var/mob/living/carbon/human/H = src
-						var/obj/item/I = used_weapon
-						if((is_carrion(H) || active_mutations.len) && (SANCTIFIED in I.aspects))
-							apply_damage(dmg / 2, BURN, def_zone, sharp, edge, used_weapon)
-
-				apply_damage(dmg, dmg_type, def_zone, sharp, edge, used_weapon)
-				if(ishuman(src) && def_zone && dmg >= 20)
-					var/mob/living/carbon/human/H = src
-					var/obj/item/organ/external/o = H.get_organ(def_zone)
-					if (o && o.status & ORGAN_SPLINTED)
-						visible_message(SPAN_WARNING("The splints break off [src] after being hit!"),
-								SPAN_WARNING("Your splints break off after being hit!"))
-						o.status &= ~ORGAN_SPLINTED
+				dmg_types[dmg_type] = dmg // Finally, we adjust the damage passing through
+			else
+				dmg_types -= dmg_type
 	var/effective_armor = (1 - dealt_damage / total_dmg) * 100
-
 
 	//Feedback
 	//In order to show both target and everyone around that armor is actually working, we are going to send message for both of them
@@ -115,7 +94,79 @@
 	if(ablative_armor)
 		damageablative(def_zone, (ablative_armor - remaining_ablative) * armour_divisor)
 
-	return dealt_damage
+	if(flesh_wound)
+		dmg_types = apply_damage_from_list(def_zone, armour_divisor, used_weapon, sharp, edge, wounding_multiplier, dmg_types)
+
+	return dmg_types
+
+// Does not take armor into account, returns damage values adjusted by flesh armor
+/mob/living/proc/apply_damage_from_list(var/def_zone, var/armour_divisor = 1, var/used_weapon, var/sharp = FALSE, var/edge = FALSE, var/wounding_multiplier = 1, var/list/dmg_types = list())
+
+	for(var/dmg_type in dmg_types)
+		var/dmg = dmg_types[dmg_type]
+		dmg *= dmg_type == HALLOSS ? 1 : wounding_multiplier
+
+		dmg_types[dmg_type] = dmg // Adjust for overpenetration
+
+		if(dmg_type == HALLOSS)
+			dmg = round(dmg * max(0.5, (get_specific_organ_efficiency(OP_NERVE, def_zone) / 100)))
+
+		if(dmg_type == BRUTE)
+
+			if ( (sharp || edge) && prob ( (1 - dmg / dmg_types[dmg_type]) * 100 ) ) // If enough of the brute damage is blocked, sharpness is lost from all followup attacks
+				sharp = FALSE
+				edge = FALSE
+
+			if(ishuman(src) && isitem(used_weapon))
+				var/mob/living/carbon/human/H = src
+				var/obj/item/I = used_weapon
+				if((is_carrion(H) || active_mutations.len) && (SANCTIFIED in I.aspects))
+					apply_damage(dmg / 2, BURN, def_zone, sharp, edge, used_weapon)
+
+		apply_damage(dmg, dmg_type, def_zone, sharp, edge, used_weapon)
+		if(ishuman(src) && def_zone && dmg >= 20)
+			var/mob/living/carbon/human/H = src
+			var/obj/item/organ/external/o = H.get_organ(def_zone)
+			if (o && o.status & ORGAN_SPLINTED)
+				visible_message(SPAN_WARNING("The splints break off [src] after being hit!"),
+						SPAN_WARNING("Your splints break off after being hit!"))
+				o.status &= ~ORGAN_SPLINTED
+
+	// Flesh reduces leftover damage
+	if(isProjectile(used_weapon))
+		var/obj/item/P = used_weapon
+		if(P.penetrating)
+			// Total reduction based on max HP
+			var/remaining_armor = getFleshCover()
+			for(var/dmg_type in dmg_types)
+				var/dmg = dmg_types[dmg_type]
+				if(dmg)
+					var/used_armor = 0 // Used for calculating the damage left after penetration
+					if(dmg_type in list(BRUTE, BURN, TOX, BLAST)) // Some damage types do not help penetrate flesh
+						if(remaining_armor)
+							var/dmg_armor_difference = dmg - remaining_armor
+							used_armor += dmg_armor_difference ? dmg - dmg_armor_difference : dmg
+							remaining_armor = dmg_armor_difference ? 0 : -dmg_armor_difference
+							dmg = dmg_armor_difference ? dmg_armor_difference : 0
+					else
+						dmg = max(dmg - remaining_armor, 0)
+					if(dmg)
+						dmg_types[dmg_type] = dmg // Finally, we adjust the damage passing through
+					else
+						dmg_types -= dmg_type
+	return dmg_types
+
+/mob/living/proc/damage_through_armor(var/damage = 0, var/damagetype = BRUTE, var/def_zone, var/attack_flag = ARMOR_MELEE, var/armour_divisor = 1, var/used_weapon, var/sharp = FALSE, var/edge = FALSE, var/wounding_multiplier = 1, var/list/dmg_types = list())
+
+	//first we go through armor to deal damage
+	var/remaining_damage = damage_armor_penetration(damage, damagetype, def_zone, attack_flag, armour_divisor, used_weapon, sharp, edge, wounding_multiplier, dmg_types, TRUE)
+
+	if(isProjectile(used_weapon)) //check if we are a penetrating projectile
+		var/obj/item/P = used_weapon
+		if(P.penetrating && remaining_damage.len)
+			//armor is two-sided, we go through it a second time
+			damage_armor_penetration(null, null, def_zone = def_zone, attack_flag = attack_flag, armour_divisor = armour_divisor, used_weapon = used_weapon, sharp = sharp, edge = edge, wounding_multiplier = wounding_multiplier, remaining_damage = remaining_damage, FALSE)
+	return remaining_damage
 
 //if null is passed for def_zone, then this should return something appropriate for all zones (e.g. area effect damage)
 /mob/living/proc/getarmor(var/def_zone, var/type)
@@ -320,6 +371,9 @@
 	return 0
 
 // End BS12 momentum-transfer code.
+
+/mob/living/proc/getFleshCover()
+	return maxHealth / 5
 
 /mob/living/attack_generic(mob/user, var/damage, var/attack_message)
 
