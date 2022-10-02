@@ -36,6 +36,14 @@
 	move_intent = decls_repository.get_decl(move_intent)
 	. = ..()
 
+/**
+ * Generate the tag for this mob
+ *
+ * This is simply "mob_"+ a global incrementing counter that goes up for every mob
+ */
+/mob/GenerateTag()
+	tag = "mob_[next_mob_id++]"
+
 /mob/proc/show_message(msg, type, alt, alt_type)//Message, type of message (1 or 2), alternative message, alt message type (1 or 2)
 	if(!client)
 		return
@@ -653,7 +661,7 @@
 	if(.)
 		if(statpanel("Status") && SSticker.current_state != GAME_STATE_PREGAME)
 			stat("Storyteller", "[master_storyteller]")
-			stat("Station Time", stationtime2text())
+			stat("Ship Time", stationtime2text())
 			stat("Round Duration", roundduration2text())
 
 		if(client.holder)
