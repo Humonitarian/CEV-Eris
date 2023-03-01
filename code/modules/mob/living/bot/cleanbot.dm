@@ -22,11 +22,14 @@
 	var/cleaning = 0
 	var/screwloose = 0
 	var/oddbutton = 0
+	var/flushed = 0
 	var/should_patrol = 0
 	var/blood = 1
 	var/list/target_types = list()
 
 	var/maximum_search_range = 7
+	var/path_complexity = 10 // Used to be 30, but caused severe lag. Pre-generated roombas will start with 15 to give them more flexibility, built ones only 10 to avoid lag machines.
+	// This does mean custom cleanbots will suffer to go around obstacles, but this is the alternative to removing them from the game, or getting a new pathing system.
 	var/give_up_cooldown = 0
 	var/list/possible_phrases = list(
 		"Foolish organic meatbags can only leak their liquids all over the place.",
@@ -53,19 +56,20 @@
 	if(loc == target.loc)
 		if(!cleaning)
 			UnarmedAttack(target)
-			return 1
+			return TRUE
 	if(!path.len)
 //		spawn(0)
-		path = AStar(loc, target.loc, /turf/proc/CardinalTurfsWithAccess, /turf/proc/Distance, 0, 30, id = botcard)
-		if(!path)
+		path = AStar(loc, target.loc, /turf/proc/CardinalTurfsWithAccess, /turf/proc/Distance, 0, path_complexity, id = botcard)
+		if(!path) // We cannot go there, blacklist the target
+			ignorelist += target
 			target = null
 			path = list()
-		return
+		return FALSE
 	if(path.len)
 		step_to(src, path[1])
 		path -= path[1]
-		return 1
-	return
+		return TRUE
+	return FALSE
 
 /mob/living/bot/cleanbot/Life()
 	..()
@@ -90,8 +94,10 @@
 		visible_message("Something flies out of [src]. He seems to be acting oddly.")
 		var/obj/effect/decal/cleanable/blood/gibs/gib = new /obj/effect/decal/cleanable/blood/gibs(loc)
 		ignorelist += gib
+		flushed++
 		spawn(600)
 			ignorelist -= gib
+			flushed--
 
 		// Find a target
 
@@ -101,6 +107,7 @@
 
 	var/found_spot
 	var/target_in_view = FALSE
+	var/AStar_counter = 3 // Limit the number of searches each lifetick
 	search_loop:
 		for(var/i=0, i <= maximum_search_range, i++)
 			for(var/obj/effect/decal/cleanable/D in view(i, src))
@@ -116,7 +123,12 @@
 						else
 							target_in_view = TRUE
 							target = null
+							if(!AStar_counter--) // Target cannot be reached
+								break search_loop
 							continue // no need to check the other types
+
+	if(!flushed)
+		ignorelist -= ignorelist[1] // Remove oldest ignored item
 
 	if(!found_spot && target_in_view && world.time > give_up_cooldown)
 		visible_message("[src] can't reach the target and is giving up.")
@@ -344,6 +356,7 @@
 	icon = 'icons/mob/battle_roomba.dmi'
 	icon_state = "roomba_medical"
 	botcard_access = list(access_moebius, access_maint_tunnels)
+	path_complexity = 15
 
 /mob/living/bot/cleanbot/roomba/update_icons()
 	return
