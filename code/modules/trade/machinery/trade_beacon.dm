@@ -43,7 +43,7 @@
 	if(!export_timer_start)
 		activate()
 		export_timer_start = world.time
-		addtimer(CALLBACK(src, .proc/reset_export_timer), export_cooldown, TIMER_STOPPABLE)
+		addtimer(CALLBACK(src, PROC_REF(reset_export_timer)), export_cooldown, TIMER_STOPPABLE)
 
 /obj/machinery/trade_beacon/sending/proc/reset_export_timer()
 	activate()
@@ -71,7 +71,7 @@
 		return FALSE
 	activate()
 	var/turf/simulated/floor/pickfloor = pick(floor)
-	if(ispath(drop_type, /obj/structure/closet/crate))
+	if(ispath(drop_type, /obj/structure/closet))
 		var/mob/living/carbon/human/dude = locate(/mob/living/carbon/human) in pickfloor
 		if(dude)
 			dude.damage_through_armor(30)

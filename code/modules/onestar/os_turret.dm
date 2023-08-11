@@ -1,6 +1,6 @@
 /obj/machinery/power/os_turret
-	name = "One Star turret"
-	desc = "A turret of the One Star variety."
+	name = "One Star Gauss turret"
+	desc = "A One Star made turret with a mounted QJZ-295 gauss machinegun." //A turret of the One Star variety.
 	icon = 'icons/obj/machines/one_star/machines.dmi'
 	icon_state = "os_gauss"
 	circuit = /obj/item/electronics/circuitboard/os_turret
@@ -16,25 +16,31 @@
 
 	// Shooting
 	var/obj/item/projectile/projectile = /obj/item/projectile/bullet/gauss
+	var/shot_sound = 'sound/weapons/guns/fire/energy_shotgun.ogg'
 	var/number_of_shots = 5
 	var/time_between_shots = 0.5 SECONDS
 	var/list/shot_timer_ids = list()
 	var/cooldown_time = null
 
 	// Internal
-	var/emp_cooldown = 4 SECONDS
+	var/emp_cooldown = 8 SECONDS
 	var/emp_timer_id
 	var/on_cooldown = FALSE
 	var/cooldown_timer_id
 
 /obj/machinery/power/os_turret/laser
+	name = "One Star laser turret"
 	icon_state = "os_laser"
+	desc = "A One Star made turret with a mounted QJZ-958 laser machinegun." //A turret of the One Star variety.
 	circuit = /obj/item/electronics/circuitboard/os_turret/laser
 	range = 10
-	projectile = /obj/item/projectile/beam/pulse
+	projectile = /obj/item/projectile/beam/pulsed_laser
+	shot_sound = 'sound/weapons/Laser.ogg'
 	number_of_shots = 3
 	time_between_shots = 0.3 SECONDS
 	cooldown_time = 2 SECONDS
+	health = 360
+	maxHealth = 360
 
 /obj/machinery/power/os_turret/Initialize()
 	. = ..()
@@ -49,7 +55,7 @@
 			do_sparks(1, TRUE, src)
 		return
 
-	if(machine_integrity <= 0)
+	if(health <= 0)
 		stat |= BROKEN
 		return
 
@@ -82,6 +88,11 @@
 			continue
 		if(L.stat == DEAD)
 			continue
+
+		if(should_target_players)
+			if(L.faction == "onestar")	// For future content or admin use
+				continue
+
 		if(L.invisibility >= INVISIBILITY_LEVEL_ONE) // Cannot see him. see_invisible is a mob-var
 			continue
 		if(!check_trajectory(L, src))	//check if we have true line of sight
@@ -91,10 +102,10 @@
 			nearest_valid_target = L
 			nearest_valid_target_distance = distance_to_target
 		else
-			if(distance_to_target > nearest_valid_target_distance)
+			if(distance_to_target < nearest_valid_target_distance)
 				nearest_valid_target = L
 				nearest_valid_target_distance = distance_to_target
-	
+
 	if(nearest_valid_target)
 		try_shoot(nearest_valid_target)
 
@@ -122,7 +133,7 @@
 /obj/machinery/power/os_turret/emp_act()
 	..()
 	stat |= EMPED
-	emp_timer_id = addtimer(CALLBACK(src, .proc/emp_off), emp_cooldown, TIMER_STOPPABLE)
+	emp_timer_id = addtimer(CALLBACK(src, PROC_REF(emp_off)), emp_cooldown, TIMER_STOPPABLE)
 
 /obj/machinery/power/os_turret/bullet_act(obj/item/projectile/proj)
 	var/damage = proj.get_structure_damage()
@@ -147,7 +158,7 @@
 /obj/machinery/power/os_turret/attackby(obj/item/I, mob/user)
 	var/mec_or_cog = max(user.stats.getStat(STAT_MEC), user.stats.getStat(STAT_COG))
 
-	if(mec_or_cog >= STAT_LEVEL_EXPERT)
+	if(mec_or_cog < STAT_LEVEL_EXPERT)
 		to_chat(user, SPAN_WARNING("You lack the knowledge or skill to perform work on \the [src]."))
 	else
 		if(default_deconstruction(I, user))
@@ -194,10 +205,12 @@
 	var/obj/item/electronics/circuitboard/os_turret/C = circuit
 	C.target_superior_mobs = TRUE
 
-/obj/machinery/power/os_turret/proc/take_damage(amount)
-	machine_integrity = max(machine_integrity - amount, 0)
-	if(machine_integrity <= 0)
+/obj/machinery/power/os_turret/take_damage(amount)
+	health = max(health - amount, 0)
+	if(!health)
 		stat |= BROKEN
+	else if(prob(50))
+		do_sparks(1, 0, loc)
 	return amount
 
 /obj/machinery/power/os_turret/proc/try_shoot(target)
@@ -227,20 +240,23 @@
 		var/timer = time_between_shots
 		shoot(target, def_zone)
 		for(var/i in 1 to to_shoot)
-			shot_timer_ids += addtimer(CALLBACK(src, .proc/shoot, target, def_zone), timer, TIMER_STOPPABLE)
+			shot_timer_ids += addtimer(CALLBACK(src, PROC_REF(shoot), target, def_zone), timer, TIMER_STOPPABLE)
 			timer += time_between_shots
-	
+
 	if(cooldown_time && !returning_fire)
 		on_cooldown = TRUE
-		cooldown_timer_id = addtimer(CALLBACK(src, .proc/cooldown), cooldown_time, TIMER_STOPPABLE)
-	
+		cooldown_timer_id = addtimer(CALLBACK(src, PROC_REF(cooldown)), cooldown_time, TIMER_STOPPABLE)
+
 	if(returning_fire)
 		returning_fire = FALSE
 
-/obj/machinery/power/os_turret/proc/shoot(target, def_zone)
+/obj/machinery/power/os_turret/proc/shoot(atom/target, def_zone)
+	if(QDELETED(target))
+		return
 	set_dir(get_dir(src, target))
 	var/obj/item/projectile/P = new projectile(loc)
 	P.launch(target, def_zone)
+	playsound(src, shot_sound, 60, 1)
 
 /obj/machinery/power/os_turret/proc/cooldown()
 	on_cooldown = FALSE
@@ -252,6 +268,7 @@
 
 /obj/item/electronics/circuitboard/os_turret
 	name = T_BOARD("One Star gauss turret")
+	description_info = "When re-constructed, this turret will target roaches, spiders, and golems."
 	build_path = /obj/machinery/power/os_turret
 	board_type = "machine"
 	origin_tech = list(TECH_DATA = 3, TECH_ENGINEERING = 5)
@@ -264,6 +281,11 @@
 		/obj/item/cell/large = 1
 	)
 	var/target_superior_mobs = FALSE
+
+/obj/item/electronics/circuitboard/os_turret/examine(user, distance)
+	. = ..()
+	if(target_superior_mobs)
+		to_chat(user, SPAN_NOTICE("When constructed, this turret will target roaches, spiders, and golems."))
 
 /obj/item/electronics/circuitboard/os_turret/laser
 	name = T_BOARD("One Star laser turret")
@@ -284,20 +306,19 @@
 	damage_types = list(BRUTE = 15)
 	armor_divisor = 3
 	penetrating = 2
-	style_damage = 15
 	recoil = 30
 	step_delay = 0.4
 	sharp = TRUE	// Until all bullets are turned sharp by default
 	wounding_mult = WOUNDING_EXTREME
 
-/obj/item/projectile/beam/pulse
+/obj/item/projectile/beam/pulsed_laser
 	name = "pulsed beam"
 	icon_state = "beam_blue"
-	damage_types = list(BURN = 15)
+	damage_types = list(BURN = 20)
 	armor_divisor = 2
 	stutter = 3
-	style_damage = 25
 	recoil = 10
+	wounding_mult = WOUNDING_WIDE
 
 	muzzle_type = /obj/effect/projectile/laser_blue/muzzle
 	tracer_type = /obj/effect/projectile/laser_blue/tracer

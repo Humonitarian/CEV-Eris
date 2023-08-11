@@ -9,7 +9,7 @@
 		melee = 8,
 		bullet = 9,
 		energy = 8,
-		bomb = 30,
+		bomb = 150,
 		bio = 100,
 		rad = 50
 	)
@@ -26,7 +26,7 @@
 		melee = 8,
 		bullet = 9,
 		energy = 8,
-		bomb = 30,
+		bomb = 150,
 		bio = 100,
 		rad = 50
 	)
@@ -36,7 +36,6 @@
 	spawn_blacklisted = TRUE
 	accompanying_object = /obj/item/clothing/head/space/syndicate
 	slowdown = LIGHT_SLOWDOWN
-	stiffness = HEAVY_STIFFNESS
 
 ///////////////////////Black Market//////////////////////////////
 

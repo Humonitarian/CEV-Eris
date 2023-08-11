@@ -14,7 +14,9 @@
 	var/jackboots = list(
 		"Standard"			=	/obj/item/clothing/shoes/jackboots,
 		"Duty"				=	/obj/item/clothing/shoes/jackboots/duty,
-		"Duty, long"		=	/obj/item/clothing/shoes/jackboots/duty/long
+		"Duty, long"		=	/obj/item/clothing/shoes/jackboots/duty/long,
+		"Service"			= 	/obj/item/clothing/shoes/jackboots/ironhammer,
+		"Oberth"			= 	/obj/item/clothing/shoes/jackboots/german
 	)
 	gear_tweaks += new /datum/gear_tweak/path(jackboots)
 
@@ -30,6 +32,20 @@
 /datum/gear/shoes/lacey
 	display_name = "shoes, classy"
 	path = /obj/item/clothing/shoes/reinforced
+
+/datum/gear/shoes/lacey
+	display_name = "classy shoes, selection"
+	path = /obj/item/clothing/shoes/reinforced
+
+/datum/gear/shoes/lacey/New()
+	..()
+	var/lacey = list(
+		"Standard"			=	/obj/item/clothing/shoes/reinforced,
+		"Service"			=	/obj/item/clothing/shoes/reinforced/ironhammer
+	)
+	gear_tweaks += new /datum/gear_tweak/path(lacey)
+
+
 
 /*//Same with /datum/gear/shoes/lacey
 
@@ -65,21 +81,22 @@
 		"Yellow"		=	/obj/item/clothing/shoes/color/yellow,
 		"Green"			=	/obj/item/clothing/shoes/color/green,
 		"Blue"			=	/obj/item/clothing/shoes/color/blue,
-		"Purple"		=	/obj/item/clothing/shoes/color/purple,
+		"Purple"		=	/obj/item/clothing/shoes/color/purple
 	)
 	gear_tweaks += new /datum/gear_tweak/path(shoes)
 
-/datum/gear/shoes/sneakerspurple
-	display_name = "purple sneakers"
-	path = /obj/item/clothing/shoes/sneakerspurple
-
-/datum/gear/shoes/sneakersblue
-	display_name = "blue sneakers"
-	path = /obj/item/clothing/shoes/sneakersblue
-
-/datum/gear/shoes/sneakersred
-	display_name = "red sneakers"
+/datum/gear/shoes/sneaker_colors
+	display_name = "sneakers, color presets"
 	path = /obj/item/clothing/shoes/sneakersred
+
+/datum/gear/shoes/sneaker_colors/New()
+	..()
+	var/sneaker_colors = list(
+		"Red" 		=	 /obj/item/clothing/shoes/sneakersred,
+		"Blue" 		=	 /obj/item/clothing/shoes/sneakersblue,
+		"Purple"	=	 /obj/item/clothing/shoes/sneakerspurple
+	)
+	gear_tweaks += new /datum/gear_tweak/path(sneaker_colors)
 
 /datum/gear/shoes/spurs
 	display_name = "spurs"

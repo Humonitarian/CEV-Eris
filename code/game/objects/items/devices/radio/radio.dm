@@ -69,7 +69,6 @@ var/global/list/default_medbay_channels = list(
 	internal_channels = default_internal_channels.Copy()
 	if(syndie)
 		internal_channels += unique_internal_channels.Copy()
-	add_hearing()
 
 /obj/item/device/radio/Destroy()
 	remove_hearing()
@@ -80,10 +79,12 @@ var/global/list/default_medbay_channels = list(
 
 	return ..()
 
+/obj/item/device/radio/LateInitialize()
+	. = ..()
+	add_hearing()
 
 /obj/item/device/radio/Initialize()
 	. = ..()
-
 	if(frequency < RADIO_LOW_FREQ || frequency > RADIO_HIGH_FREQ)
 		frequency = sanitize_frequency(frequency, RADIO_LOW_FREQ, RADIO_HIGH_FREQ)
 	set_frequency(frequency)
@@ -281,6 +282,9 @@ var/global/list/default_medbay_channels = list(
 	//  Fix for permacell radios, but kinda eh about actually fixing them.
 	if(!M || !message) return 0
 
+	if(speaking && (speaking.flags & (NONVERBAL|SIGNLANG))) // so we don't speak sign language over radio
+		return 0
+
 	//  Uncommenting this. To the above comment:
 	// 	The permacell radios aren't suppose to be able to transmit, this isn't a bug and this "fix" is just making radio wires useless. -Giacom
 	if(wires.IsIndexCut(WIRE_TRANSMIT)) // The device has to have all its wires and shit intact
@@ -355,7 +359,7 @@ var/global/list/default_medbay_channels = list(
 		displayname = M.GetVoice()
 		jobname = "Unknown"
 		voicemask = 1
-	SEND_SIGNAL(src, COMSIG_MESSAGE_SENT)
+	SEND_SIGNAL_OLD(src, COMSIG_MESSAGE_SENT)
 
 
 
@@ -778,9 +782,6 @@ var/global/list/default_medbay_channels = list(
 	var/bluespace_cooldown = 10 MINUTES
 	var/last_bluespace = 0
 	var/bluespace_items = list(
-		/obj/item/computer_hardware/hard_drive/portable/design/guns/dallas = 25,
-		/obj/item/gun/energy/plasma/stranger = 25,
-		/obj/machinery/artifact = 25,
 		/obj/item/computer_hardware/hard_drive/portable/design/guns/fs_wintermute = 5,
 		/obj/item/computer_hardware/hard_drive/portable/design/excelsior/ak47 = 5,
 		/obj/item/computer_hardware/hard_drive/portable/design/nt/nt_lightfall = 5,
@@ -798,7 +799,7 @@ var/global/list/default_medbay_channels = list(
 /obj/item/device/radio/random_radio/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	for(var/mob/living/carbon/human/H in viewers(get_turf(src)))
-		SEND_SIGNAL(H, COMSIG_OBJ_FACTION_ITEM_DESTROY, src)
+		SEND_SIGNAL_OLD(H, COMSIG_OBJ_FACTION_ITEM_DESTROY, src)
 	GLOB.all_faction_items -= src
 	GLOB.guild_faction_item_loss++
 	. = ..()

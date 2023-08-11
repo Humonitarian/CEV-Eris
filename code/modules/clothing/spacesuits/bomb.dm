@@ -9,13 +9,12 @@
 		melee = 10,
 		bullet = 10,
 		energy = 10,
-		bomb = 100,
+		bomb = 1000,
 		bio = 100,
 		rad = 90
 	)
 	siemens_coefficient = 0
 	tint = TINT_LOW
-	obscuration = HEAVY_OBSCURATION
 	price_tag = 100
 
 /obj/item/clothing/suit/space/bomb
@@ -30,7 +29,7 @@
 		melee = 10,
 		bullet = 10,
 		energy = 10,
-		bomb = 100,
+		bomb = 1000,
 		bio = 100,
 		rad = 90
 	)
@@ -40,7 +39,6 @@
 	equip_delay = 10 SECONDS
 	price_tag = 300
 	slowdown = HEAVY_SLOWDOWN
-	stiffness = HEAVY_STIFFNESS
 
 /obj/item/clothing/head/space/bomb/security
 	icon_state = "bombsuitsec"

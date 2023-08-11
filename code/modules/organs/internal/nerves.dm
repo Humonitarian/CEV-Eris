@@ -5,7 +5,9 @@
 	description_info = "Increases limb sensitivity, making you more susceptible to pain, but also more precise with tools"
 	organ_efficiency = list(OP_NERVE = 100)
 	price_tag = 100
-	max_damage = 50
+	max_damage = IORGAN_TINY_HEALTH
+	min_bruised_damage = IORGAN_TINY_BRUISE
+	min_broken_damage = IORGAN_TINY_BREAK
 	specific_organ_size = 0
 	blood_req = 0.5
 	max_blood_storage = 2.5

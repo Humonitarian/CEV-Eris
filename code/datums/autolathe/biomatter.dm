@@ -65,6 +65,10 @@
 	name = "NT Acolyte Jacket"
 	build_path = /obj/item/clothing/suit/storage/neotheology_jacket
 
+/datum/design/bioprinter/nt_clothes/acolyte_jacket/black
+	name = "NT Black Acolyte Jacket"
+	build_path = /obj/item/clothing/suit/storage/neotheology_jacket/black
+
 /datum/design/bioprinter/nt_clothes/sports_jacket
 	name = "NT Sports Jacket"
 	build_path = /obj/item/clothing/suit/storage/neotheosports
@@ -81,17 +85,25 @@
 	name = "NT Church Garment"
 	build_path = /obj/item/clothing/under/rank/church
 
+/datum/design/bioprinter/nt/spacehelmet/medicus
+	name = "NT Medicus Helmet"
+	build_path = /obj/item/clothing/head/space/medicus
+
+/datum/design/bioprinter/nt/spacesuit/medicus
+	name = "NT Medicus Robes"
+	build_path = /obj/item/clothing/suit/space/medicus
+
 /datum/design/bioprinter/jackboots
 	name = "Custodian's jackboots"
 	build_path = /obj/item/clothing/shoes/jackboots/neotheology
 	materials = list(MATERIAL_BIOMATTER = 20)
 
 /datum/design/bioprinter/belt/utility
-	name = "Neotheologian utility belt"
+	name = "Neotheology utility belt"
 	build_path = /obj/item/storage/belt/utility/neotheology
 
 /datum/design/bioprinter/belt/security
-	name = "Neotheologian tactical belt"
+	name = "Neotheology tactical belt"
 	build_path = /obj/item/storage/belt/tactical/neotheology
 
 /datum/design/bioprinter/backpack
@@ -252,43 +264,12 @@
 	build_path = /obj/item/cell/small/neotheology/plasma
 	materials = list(MATERIAL_PLASMA = 1)
 
-//[CELLS]
-/datum/design/bioprinter/nt_cells/large
-	name = "NT \"Spark 13000L\""
-	build_path = /obj/item/cell/large/neotheology
-	materials = list(MATERIAL_BIOMATTER = 15)
-
-/datum/design/bioprinter/nt_cells/large/plasma
-	name = "NT \"Radiance 20000L\""
-	build_path = /obj/item/cell/large/neotheology/plasma
-	materials = list(MATERIAL_PLASMA = 3)
-
-/datum/design/bioprinter/nt_cells/medium
-	name = "NT \"Spark 1000M\""
-	build_path = /obj/item/cell/medium/neotheology/
-	materials = list(MATERIAL_BIOMATTER = 10)
-
-/datum/design/bioprinter/nt_cells/medium/plasma
-	name = "NT \"Radiance 1500M\""
-	build_path = /obj/item/cell/medium/neotheology/plasma
-	materials = list(MATERIAL_PLASMA = 2)
-
-/datum/design/bioprinter/nt_cells/small
-	name = "NT \"Spark 300S\""
-	build_path = /obj/item/cell/small/neotheology/
-	materials = list(MATERIAL_BIOMATTER = 5)
-
-/datum/design/bioprinter/nt_cells/small/plasma
-	name = "NT \"Radiance 500S\""
-	build_path = /obj/item/cell/small/neotheology/plasma
-	materials = list(MATERIAL_PLASMA = 1)
-
 //[/THINGS]
 /datum/design/autolathe/nt
 	factions = list(FACTION_NEOTHEOLOGY)
 
 /datum/design/autolathe/firstaid/nt
-	name = "NeoTheologian Medkit"
+	name = "NeoTheology Medkit"
 	build_path = /obj/item/storage/firstaid/nt
 	factions = list(FACTION_NEOTHEOLOGY)
 
@@ -359,12 +340,16 @@
 	build_path = /obj/item/tool/sword/nt/spear
 
 /datum/design/autolathe/nt/sword/nt_verutum
-	name = "NT Javelin"
-	build_path = /obj/item/stack/thrown/nt/verutum
+	name = "NT Javelins (3)"
+	build_path = /obj/item/stack/thrown/nt/verutum/full
 
 /datum/design/autolathe/nt/tool_upgrade/sanctifier
 	name = "sanctifier"
 	build_path = /obj/item/tool_upgrade/augment/sanctifier
+
+/datum/design/autolathe/nt/staff/nt_staff
+	name = "NT Crosier"
+	build_path = /obj/item/tool/hammer/staff/nt
 
 //[GRENADES]
 /datum/design/autolathe/nt/grenade/nt_smokebomb

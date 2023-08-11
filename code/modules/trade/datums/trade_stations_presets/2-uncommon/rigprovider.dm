@@ -31,7 +31,6 @@
 			/obj/item/rig_module/mounted/taser = good_data("Mounted Taser", list(1, 10), null),
 			/obj/item/rig_module/device/drill = good_data("Mounted Drill", list(1, 10), null),
 			/obj/item/rig_module/device/orescanner = good_data("Mounted Ore Scanner", list(1, 10), null),
-			/obj/item/rig_module/device/anomaly_scanner = good_data("Mounted Anomaly Scanner", list(1,10), null),
 			/obj/item/rig_module/device/rcd = good_data("Mounted RCD", list(1, 10), null),
 			/obj/item/rig_module/device/healthscanner = good_data("Mounted Health Scanner", list(1, 10), null),
 			/obj/item/rig_module/modular_injector,
@@ -46,6 +45,7 @@
 	hidden_inventory = list(
 		"RIGs II" =  list(
 			/obj/item/rig/light = custom_good_amount_range(list(1, 5)),
+			/obj/item/rig/combat = custom_good_amount_range(list(1, 5)),
 			/obj/item/rig_module/held/shield,
 			/obj/item/rig_module/datajack,
 			/obj/item/rig_module/electrowarfare_suite,
@@ -65,6 +65,5 @@
 		/obj/item/rig/techno = offer_data("technomancer suit control module", 8000, 1),
 		/obj/item/rig/combat/ironhammer = offer_data("Ironhammer hardsuit control module", 8000, 1),
 		/obj/item/rig/merc = offer_data("crimson hardsuit control module", 10000, 1),
-		/obj/item/rig/light/stealth = offer_data("stealth suit control module", 20000, 1),
 		/obj/item/rig/light/hacker = offer_data("cybersuit control module", 10000, 1)
 	)

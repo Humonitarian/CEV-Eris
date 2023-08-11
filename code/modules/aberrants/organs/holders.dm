@@ -28,36 +28,41 @@
 
 /obj/item/organ/internal/scaffold/New()
 	..()
-	RegisterSignal(src, COMSIG_ABERRANT_COOLDOWN, .proc/start_cooldown)
+	RegisterSignal(src, COMSIG_ABERRANT_COOLDOWN, PROC_REF(start_cooldown))
 	if(use_generated_icon)
 		organ_type = "-[rand(1,8)]"
 	update_icon()
 
 /obj/item/organ/internal/scaffold/Destroy()
-	..()
 	UnregisterSignal(src, COMSIG_ABERRANT_COOLDOWN)
+	if(LAZYLEN(item_upgrades))
+		for(var/datum/mod in item_upgrades)
+			SEND_SIGNAL_OLD(mod, COMSIG_REMOVE, src)
+			qdel(mod)
+	return ..()
 
 /obj/item/organ/internal/scaffold/Process()
 	..()
 	if(owner && !on_cooldown && damage < min_broken_damage)
-		SEND_SIGNAL(src, COMSIG_ABERRANT_INPUT, src, owner)
+		SEND_SIGNAL_OLD(src, COMSIG_ABERRANT_INPUT, src, owner)
 
 /obj/item/organ/internal/scaffold/examine(mob/user)
 	. = ..()
 	var/using_sci_goggles = FALSE
 	var/details_unlocked = FALSE
 
-	if(ishuman(user))
+	if(isghost(user))
+		details_unlocked = TRUE
+	else if(user.stats)
 		// Goggles check
-		var/mob/living/carbon/human/H = user
-		if(istype(H.glasses, /obj/item/clothing/glasses/powered/science))
-			var/obj/item/clothing/glasses/powered/G = H.glasses
-			using_sci_goggles = G.active	// Meat vision
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			if(H && istype(H.glasses, /obj/item/clothing/glasses/powered/science))
+				var/obj/item/clothing/glasses/powered/G = H.glasses
+				using_sci_goggles = G.active	// Meat vision
 
 		// Stat check
 		details_unlocked = (user.stats.getStat(STAT_BIO) >= STAT_LEVEL_EXPERT - 5 && user.stats.getStat(STAT_COG) >= STAT_LEVEL_BASIC - 5) ? TRUE : FALSE
-	else if(istype(user, /mob/observer/ghost))
-		details_unlocked = TRUE
 
 	if(using_sci_goggles || details_unlocked)
 		var/function_info
@@ -112,7 +117,8 @@
 
 	update_color()
 
-	SEND_SIGNAL(src, COMSIG_APPVAL, src)
+	SEND_SIGNAL(src, COMSIG_IWOUND_EFFECTS)
+	SEND_SIGNAL(src, COMSIG_APPVAL)
 
 	update_name()
 	update_icon()
@@ -216,8 +222,9 @@
 		return new_name
 
 /obj/item/organ/internal/scaffold/proc/start_cooldown()
+	SIGNAL_HANDLER
 	on_cooldown = TRUE
-	addtimer(CALLBACK(src, .proc/end_cooldown), aberrant_cooldown_time, TIMER_STOPPABLE)
+	addtimer(CALLBACK(src, PROC_REF(end_cooldown)), aberrant_cooldown_time, TIMER_STOPPABLE)
 
 /obj/item/organ/internal/scaffold/proc/end_cooldown()
 	on_cooldown = FALSE
@@ -248,6 +255,7 @@
 	var/base_input_type = null
 	var/list/specific_input_type_pool = list()
 	var/input_mode = null
+	var/input_threshold = 0
 	var/list/process_info = list()
 	var/should_process_have_organ_stats = TRUE
 	var/list/output_pool = list()
@@ -295,7 +303,7 @@
 
 	var/obj/item/modification/organ/internal/input/I
 	if(ispath(input_mod_path, /obj/item/modification/organ/internal/input))
-		I = new input_mod_path(src, FALSE, null, input_info, input_mode, additional_input_info)
+		I = new input_mod_path(src, FALSE, null, input_info, input_mode, input_threshold, additional_input_info)
 
 	var/obj/item/modification/organ/internal/process/P
 	if(ispath(process_mod_path, /obj/item/modification/organ/internal/process))
@@ -310,13 +318,13 @@
 		S = new special_mod_path(src, FALSE, null, special_info)
 
 	if(I)
-		SEND_SIGNAL(I, COMSIG_IATTACK, src)
+		SEND_SIGNAL_OLD(I, COMSIG_IATTACK, src)
 
 	if(P)
-		SEND_SIGNAL(P, COMSIG_IATTACK, src)
+		SEND_SIGNAL_OLD(P, COMSIG_IATTACK, src)
 
 	if(O)
-		SEND_SIGNAL(O, COMSIG_IATTACK, src)
+		SEND_SIGNAL_OLD(O, COMSIG_IATTACK, src)
 
 	if(S)
-		SEND_SIGNAL(S, COMSIG_IATTACK, src)
+		SEND_SIGNAL_OLD(S, COMSIG_IATTACK, src)

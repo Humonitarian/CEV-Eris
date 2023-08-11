@@ -40,8 +40,14 @@
 		var/mutable_appearance/label = mutable_appearance(icon, label_icon)
 		add_overlay(label)
 
-
 //// Subtypes ////
+
+/obj/item/reagent_containers/glass/beaker/cryoxadone
+	preloaded_reagents = list("cryoxadone" = 30)
+	spawn_blacklisted = TRUE
+
+/obj/item/reagent_containers/glass/beaker/sulphuric
+	preloaded_reagents = list("sacid" = 60)
 
 /obj/item/reagent_containers/glass/beaker/large
 	name = "large beaker"
@@ -77,16 +83,6 @@
 	spawn_blacklisted = TRUE
 	price_tag = 300
 
-/obj/item/reagent_containers/glass/beaker/bowl
-	name = "mixing bowl"
-	desc = "A large mixing bowl."
-	icon = 'icons/obj/kitchen.dmi'
-	icon_state = "mixingbowl"
-	matter = list(MATERIAL_STEEL = 2)
-	volume = 180
-	amount_per_transfer_from_this = 10
-	possible_transfer_amounts = list(5,10,15,25,30,60,120,180)
-	unacidable = FALSE
 
 /obj/item/reagent_containers/glass/beaker/vial
 	name = "vial"
@@ -113,12 +109,10 @@
 	preloaded_reagents = list("kognim" = 30)
 	spawn_blacklisted = TRUE
 
-/obj/item/reagent_containers/glass/beaker/cryoxadone
-	preloaded_reagents = list("cryoxadone" = 30)
-	spawn_blacklisted = TRUE
-
-/obj/item/reagent_containers/glass/beaker/sulphuric
-	preloaded_reagents = list("sacid" = 60)
+/obj/item/reagent_containers/glass/beaker/vial/psilocybin
+	preloaded_reagents = list("psilocybin" = 30)
+	spawn_frequency = 5
+	rarity_value = 30
 
 /obj/item/reagent_containers/glass/beaker/vial/vape
 	name = "vape vial"

@@ -11,7 +11,6 @@
 	var/frequency = 1
 	hitscan = 1
 	invisibility = 101	//beam projectiles are invisible as they are rendered by the effect engine
-	style_damage = 30 //hitscan, light speed projectiles? Be glad its easier to dodge than a revolver.
 	recoil = 1 // Even less than self-propelled bullets
 
 	muzzle_type = /obj/effect/projectile/laser/muzzle
@@ -23,10 +22,8 @@
 /obj/item/projectile/beam/check_penetrate(var/atom/A)
 	if(istype(A, /obj/item/shield))
 		var/obj/item/shield/S = A
-		var/loss = min(round(armor_divisor * 2 / S.shield_integrity * 1.8), 1)
-		for(var/i in damage_types)
-			damage_types[i] *= loss
-
+		var/loss = round(S.shield_integrity / 8)
+		block_damage(loss, A)
 		A.visible_message(SPAN_WARNING("\The [src] is weakened by the \the [A]!"))
 		playsound(A.loc, 'sound/weapons/shield/shielddissipate.ogg', 50, 1)
 		return 1
@@ -46,7 +43,7 @@
 /obj/item/projectile/beam/cutter/on_impact(var/atom/A)
 	if(istype(A, /turf/simulated/mineral))
 		var/turf/simulated/mineral/M = A
-		M.GetDrilled(1)
+		M.GetDrilled(5)
 	.=..()
 
 /obj/item/projectile/beam/practice
@@ -65,7 +62,6 @@
 	icon_state = "heavylaser"
 	damage_types = list(BURN = 50)
 	armor_divisor = 1
-	style_damage = 60 //it's a slow firing beam weapon, this is probably fair.
 	recoil = 3
 
 	muzzle_type = /obj/effect/projectile/laser_heavy/muzzle
@@ -79,7 +75,6 @@
 	var/contractor = FALSE //Check if it's a contractor psychic beam
 	damage_types = list(PSY = 30)
 	armor_divisor = ARMOR_PEN_MAX
-	style_damage = 60 //It's magic brain beams, deal with it.
 	recoil = 2
 
 	muzzle_type = /obj/effect/projectile/psychic_laser_heavy/muzzle
@@ -126,7 +121,7 @@
 
 /obj/item/projectile/beam/pulse/on_hit(atom/target)
 	if(isturf(target))
-		target.ex_act(2)
+		target.explosion_act(100, null)
 	..()
 
 /obj/item/projectile/beam/emitter
@@ -197,7 +192,6 @@
 	damage_types = list(BURN = 60)
 	armor_divisor = 2
 	stutter = 3
-	style_damage = 70 //it's the laser AMR.
 	recoil = 10
 
 	muzzle_type = /obj/effect/projectile/xray/muzzle

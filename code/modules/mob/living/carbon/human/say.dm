@@ -1,7 +1,7 @@
 /mob/living/carbon/human/proc/get_suppressed_message()
 	var/static/list/messages = list(
 		"You try to do something, but your brain refuses to. ",
-		"Body is no more yours! The sentience from deep now reign.",
+		"Your body is no longer yours! The sentience from deep now reigns.",
 		"Your actions are drowning in your brain helplessly.",
 		"You have no power over your body!",
 		"The only thing under your control is your senses!"
@@ -55,7 +55,7 @@
 	. = ..(message, alt_name = alt_name)
 
 	if(.)
-		SEND_SIGNAL(src, COMSIG_HUMAN_SAY, message)
+		SEND_SIGNAL_OLD(src, COMSIG_HUMAN_SAY, message)
 
 /mob/living/carbon/human/proc/forcesay(list/append)
 	if(stat == CONSCIOUS)

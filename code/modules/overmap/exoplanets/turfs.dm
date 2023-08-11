@@ -44,13 +44,11 @@
 	else
 		..()*/
 
-/turf/simulated/floor/exoplanet/ex_act(severity)
-	switch(severity)
-		if(1)
-			ChangeTurf(get_base_turf_by_area(src))
-		if(2)
-			if(prob(40))
-				ChangeTurf(get_base_turf_by_area(src))
+/turf/simulated/floor/exoplanet/explosion_act(target_power, explosion_handler/handler)
+	if(target_power > health)
+		ChangeTurf(get_base_turf_by_area(src))
+	. = ..()
+
 /*
 /turf/simulated/floor/exoplanet/water/is_flooded(lying_mob, absolute)
 	. = absolute ? ..() : lying_mob*/
@@ -185,24 +183,17 @@
 
 	if (istype(C, /obj/item/stack/material))
 		var/obj/item/stack/material/M = C
-
 		var/material/mat = M.get_material()
 		if (!mat.name == MATERIAL_STEEL)
-
 			return
 
 		var/obj/structure/lattice/L = locate(/obj/structure/lattice, src)
-
 		if(L)
-			var/obj/item/stack/tile/floor/S = C
-			if (S.get_amount() < 4)
-				return
-
 			to_chat(user, SPAN_NOTICE("You start constructing underplating on the lattice."))
 			playsound(src, 'sound/weapons/Genhit.ogg', 50, 1)
-			if(do_after(user,80, src))
+			if(do_after(user, (40 * user.stats.getMult(STAT_MEC, STAT_LEVEL_EXPERT, src))))
 				qdel(L)
-				S.use(4)
+				M.use(1)
 				ChangeTurf(/turf/simulated/floor/plating/under)
 			return
 		else

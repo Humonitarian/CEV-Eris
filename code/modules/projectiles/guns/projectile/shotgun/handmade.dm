@@ -1,6 +1,6 @@
 /obj/item/gun/projectile/shotgun/slidebarrel
 	name = "HM SG \"Ponyets\""
-	desc = "Made out of trash, but rather special on its design."
+	desc = "Made out of trash, but rather special in its design."
 	icon = 'icons/obj/guns/projectile/slideshotgun.dmi'
 	icon_state = "slideshotgun"
 	item_state = "slideshotgun"
@@ -11,27 +11,26 @@
 	slot_flags = SLOT_BELT|SLOT_HOLSTER
 	can_dual = TRUE
 	ammo_type = /obj/item/ammo_casing/shotgun
-	matter = list(MATERIAL_STEEL = 20, MATERIAL_PLASTIC = 5, MATERIAL_WOOD = 12)
+	matter = list(MATERIAL_STEEL = 10, MATERIAL_WOOD = 5)
 	w_class = ITEM_SIZE_NORMAL
 	force = WEAPON_FORCE_PAINFUL
 	damage_multiplier = 1.2
 	penetration_multiplier = 0.2
 	init_recoil = CARBINE_RECOIL(3.5)
-	style_damage_multiplier = 2
 	price_tag = 250 //cheap as they get
 	spawn_blacklisted = FALSE
 	spawn_tags = SPAWN_TAG_GUN_HANDMADE
-	gun_parts = list(/obj/item/part/gun/frame/ponyets = 1, /obj/item/part/gun/grip/wood = 1, /obj/item/part/gun/mechanism/shotgun/steel = 1, /obj/item/part/gun/barrel/shotgun/steel = 1)
+	gun_parts = list(/obj/item/part/gun/frame/ponyets = 1, /obj/item/part/gun/modular/grip/wood = 1, /obj/item/part/gun/modular/mechanism/shotgun/steel = 1, /obj/item/part/gun/modular/barrel/shotgun/steel = 1)
 
 /obj/item/part/gun/frame/ponyets
 	name = "Ponyets frame"
 	desc = "A Ponyets. One shot, better make it count. And try not to blow your fingers off."
 	icon_state = "frame_ponyets"
-	matter = list(MATERIAL_STEEL = 20, MATERIAL_PLASTIC = 5, MATERIAL_WOOD = 6)
+	matter = list(MATERIAL_STEEL = 5)
 	resultvars = list(/obj/item/gun/projectile/shotgun/slidebarrel)
-	gripvars = list(/obj/item/part/gun/grip/wood)
-	mechanismvar = /obj/item/part/gun/mechanism/shotgun/steel
-	barrelvars = list(/obj/item/part/gun/barrel/shotgun/steel, /obj/item/part/gun/barrel/antim)
+	gripvars = list(/obj/item/part/gun/modular/grip/wood)
+	mechanismvar = /obj/item/part/gun/modular/mechanism/shotgun/steel
+	barrelvars = list(/obj/item/part/gun/modular/barrel/shotgun/steel, /obj/item/part/gun/modular/barrel/antim)
 
 /obj/item/gun/projectile/shotgun/slidebarrel/load_ammo(obj/item/A, mob/user)
 	if(istype(A, /obj/item/ammo_casing))

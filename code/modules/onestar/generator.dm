@@ -1,13 +1,14 @@
 /obj/machinery/power/port_gen/os_generator
-	name = "fusion microgenerator"
+	name = "One Star fusion microgenerator"
 	icon = 'icons/obj/machines/one_star/machines.dmi'
+	desc = "A One Star cold fusion reactor capable of providing endless power. It looks like it will take someone very smart to get it running again." //todo:make a system to directly repair a generator without deconning
 	icon_state = "generator"
 	circuit = /obj/item/electronics/circuitboard/os_generator
 	power_gen = 0						// Watts output per power_output level
 	var/can_generate_power = FALSE
 	var/is_circuit_fried = FALSE		// Doesn't actually fry anything, maybe it should
-	var/power_gen_gain_per_tick = 100	// How fast this thing ramps up
-	var/max_power_gen = 30000
+	var/power_gen_gain_per_tick = 10000	// How fast this thing ramps up
+	var/max_power_gen = 300000
 	var/max_power_output = 10			// The maximum power setting without emagging.
 
 /obj/machinery/power/port_gen/os_generator/Initialize()
@@ -39,8 +40,11 @@
 	else
 		icon_state = initial(icon_state) + (active ? "_on" : null)
 
-/obj/machinery/power/port_gen/os_generator/examine(mob/living/carbon/user)
+/obj/machinery/power/port_gen/os_generator/examine(mob/living/user)
 	..(user)
+	if(!istype(user))
+		return
+
 	var/mec_or_cog = max(user.stats.getStat(STAT_MEC), user.stats.getStat(STAT_COG))
 	if(mec_or_cog >= STAT_LEVEL_PROF)
 		if(can_generate_power)
@@ -74,7 +78,7 @@
 
 /obj/machinery/power/port_gen/os_generator/attackby(obj/item/I, mob/user)
 	var/mec_or_cog = max(user.stats.getStat(STAT_MEC), user.stats.getStat(STAT_COG))
-	if(mec_or_cog >= STAT_LEVEL_EXPERT)
+	if(mec_or_cog < STAT_LEVEL_EXPERT)
 		to_chat(user, SPAN_WARNING("You lack the knowledge or skill to perform work on \the [src]."))
 		return
 

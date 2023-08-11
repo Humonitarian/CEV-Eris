@@ -88,14 +88,14 @@
 	item_state = "knife"
 	matter = list(MATERIAL_PLASTEEL = 4, MATERIAL_PLASTIC = 1)
 	force = WEAPON_FORCE_PAINFUL
-	embed_mult = 3
+	embed_mult = 6
 	max_upgrades = 3
 	spawn_blacklisted = TRUE
 
 /obj/item/tool/knife/neotritual/equipped(mob/living/H)
 	. = ..()
 	if(is_held() && is_neotheology_disciple(H))
-		embed_mult = 0.1
+		embed_mult = 0.05
 	else
 		embed_mult = initial(embed_mult)
 
@@ -108,7 +108,7 @@
 	matter = list(MATERIAL_PLASTEEL = 3, MATERIAL_PLASTIC = 2)
 	force = WEAPON_FORCE_PAINFUL
 	armor_divisor = ARMOR_PEN_MODERATE
-	embed_mult = 0.3
+	embed_mult = 0.6
 	max_upgrades = 3
 
 /obj/item/tool/knife/dagger
@@ -129,7 +129,7 @@
 	item_state = "fancydagger"
 	matter = list(MATERIAL_PLASTEEL = 3, MATERIAL_PLASTIC = 2, MATERIAL_GOLD = 1, MATERIAL_SILVER = 1)
 	armor_divisor = ARMOR_PEN_MASSIVE
-	embed_mult = 0.3
+	embed_mult = 0.6
 	max_upgrades = 4
 	spawn_blacklisted = TRUE
 
@@ -140,7 +140,7 @@
 	item_state = "bluespace_dagger"
 	matter = list(MATERIAL_PLASTEEL = 3, MATERIAL_PLASTIC = 2, MATERIAL_SILVER = 10, MATERIAL_GOLD = 5, MATERIAL_PLASMA = 20)
 	force = WEAPON_FORCE_NORMAL+1
-	embed_mult = 25 //You WANT it to embed
+	embed_mult = 50 //You WANT it to embed
 	suitable_cell = /obj/item/cell/small
 	toggleable = TRUE
 	use_power_cost = 0.4
@@ -335,6 +335,8 @@
 	flags = CONDUCT
 	sharp = TRUE
 	edge = TRUE
+	extended_reach = TRUE
+	push_attack = TRUE
 	worksound = WORKSOUND_HARD_SLASH
 	w_class = ITEM_SIZE_BULKY //4 , it's a spear mate
 	force = WEAPON_FORCE_PAINFUL
@@ -349,8 +351,6 @@
 	slot_flags = SLOT_BACK
 	structure_damage_factor = STRUCTURE_DAMAGE_BLADE
 	allow_spin = FALSE
-	style_damage = 20
-
 	rarity_value = 20
 	spawn_tags = SPAWN_TAG_KNIFE
 
@@ -366,7 +366,6 @@
 	tool_qualities = list(QUALITY_CUTTING = 10,  QUALITY_WIRE_CUTTING = 5, QUALITY_SCREW_DRIVING = 5)
 	matter = list(MATERIAL_STEEL = 3)
 	structure_damage_factor = STRUCTURE_DAMAGE_WEAK
-	style_damage = 30
 
 	rarity_value = 60
 
@@ -382,7 +381,6 @@
 	tool_qualities = list(QUALITY_CUTTING = 15,  QUALITY_WIRE_CUTTING = 10, QUALITY_SCREW_DRIVING = 10)
 	matter = list(MATERIAL_STEEL = 1, MATERIAL_PLASTEEL = 2)
 	structure_damage_factor = STRUCTURE_DAMAGE_NORMAL
-	style_damage = 50
 
 /obj/item/tool/spear/uranium
 	name = "uranium spear"
@@ -395,10 +393,23 @@
 	armor_divisor = ARMOR_PEN_DEEP
 	tool_qualities = list(QUALITY_CUTTING = 10,  QUALITY_WIRE_CUTTING = 5, QUALITY_SCREW_DRIVING = 5)
 	matter = list(MATERIAL_STEEL = 3, MATERIAL_URANIUM = 1)
-	style_damage = 50
 
 /obj/item/tool/spear/uranium/apply_hit_effect(mob/living/carbon/human/target, mob/living/user, hit_zone)
 	..()
 	if(istype(target))
-		target.apply_effect(rand(5, 10), IRRADIATE)
+		target.apply_effect(rand(60, 65), IRRADIATE)
 
+/obj/item/tool/spear/makeshift_halberd
+	name = "makeshift halberd"
+	desc = "Slap a heavy blade on some rods duct-taped together and call it a day."
+	icon_state = "makeshift_halberd"
+	item_state = "makeshift_halberd"
+	wielded_icon = "makeshift_halberd_wielded"
+	force = WEAPON_FORCE_ROBUST
+	throwforce = WEAPON_FORCE_NORMAL
+	armor_divisor = ARMOR_PEN_SHALLOW
+	tool_qualities = list(QUALITY_CUTTING = 10)
+	matter = list(MATERIAL_STEEL = 5)
+	forced_broad_strike = TRUE
+	rarity_value = 90
+	degradation = 3

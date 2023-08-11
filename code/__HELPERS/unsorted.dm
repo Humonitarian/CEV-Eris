@@ -7,14 +7,6 @@
 //Checks if all high bits in req_mask are set in bitfield
 #define BIT_TEST_ALL(bitfield, req_mask) ((~(bitfield) & (req_mask)) == 0)
 
-/// isnum() returns TRUE for NaN. Also, NaN != NaN. Checkmate, BYOND.
-#define isnan(x) ( (x) != (x) )
-
-#define isinf(x) (isnum((x)) && (((x) == text2num("inf")) || ((x) == text2num("-inf"))))
-
-/// NaN isn't a number, damn it. Infinity is a problem too.
-#define isnum_safe(x) ( isnum((x)) && !isnan((x)) && !isinf((x)) )
-
 //Inverts the colour of an HTML string
 /proc/invertHTML(HTMLstring)
 	if(!istext(HTMLstring))
@@ -452,7 +444,7 @@ Turf and target are seperate in case you want to teleport some distance from a t
 //Orders mobs by type then by name
 /proc/sortmobs()
 	var/list/moblist = list()
-	var/list/sortmob = sortNames(SSmobs.mob_list)
+	var/list/sortmob = sortNames(SSmobs.mob_list | SShumans.mob_list)
 	for(var/mob/observer/eye/M in sortmob)
 		moblist.Add(M)
 	for(var/mob/living/silicon/ai/M in sortmob)
@@ -1032,7 +1024,7 @@ GLOBAL_LIST_INIT(duplicate_forbidden_vars,list(
 
 /proc/get_mob_with_client_list()
 	var/list/mobs = list()
-	for(var/mob/M in SSmobs.mob_list)
+	for(var/mob/M in SSmobs.mob_list | SShumans.mob_list)
 		if(M.client)
 			mobs += M
 	return mobs

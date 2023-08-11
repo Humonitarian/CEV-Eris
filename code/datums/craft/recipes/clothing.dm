@@ -3,6 +3,64 @@
 	time = 50
 	related_stats = list(STAT_COG)
 
+/datum/craft_recipe/clothing/dusters
+	name = "steel knuckle dusters"
+	result = /obj/item/clothing/gloves/dusters
+	steps = list(
+		list(CRAFT_MATERIAL, 3, MATERIAL_STEEL), //Grab some steel
+		list(QUALITY_WELDING, 10, "time" = 30), //Weld it into basic form
+		list(QUALITY_HAMMERING, 15, 10) //Harden into shape
+	)
+
+/datum/craft_recipe/clothing/dusters/silver
+	name = "silver knuckle dusters"
+	result = /obj/item/clothing/gloves/dusters/silver
+	steps = list(
+		list(CRAFT_MATERIAL, 3, MATERIAL_SILVER), //Grab some silver
+		list(QUALITY_WELDING, 10, "time" = 30), //Weld it into basic form
+		list(QUALITY_HAMMERING, 15, 10) //Harden into shape
+	)
+
+/datum/craft_recipe/clothing/dusters/plasteel
+	name = "plasteel knuckle dusters"
+	result = /obj/item/clothing/gloves/dusters/plasteel
+	steps = list(
+		list(CRAFT_MATERIAL, 3, MATERIAL_PLASTEEL), //Grab some plasteel
+		list(QUALITY_WELDING, 10, "time" = 30), //Weld it into basic form
+		list(QUALITY_HAMMERING, 15, 10) //Harden into shape
+	)
+
+/datum/craft_recipe/clothing/dusters/gold
+	name = "golden knuckle dusters"
+	result = /obj/item/clothing/gloves/dusters/gold
+	steps = list(
+		list(CRAFT_MATERIAL, 3, MATERIAL_GOLD), //Grab some gold
+		list(CRAFT_MATERIAL, 3, MATERIAL_PLASTEEL), //Grab some plasteel as well
+		list(QUALITY_WELDING, 10, "time" = 30), //Weld it into basic form
+		list(QUALITY_HAMMERING, 15, 10) //Harden into shape
+	)
+
+/datum/craft_recipe/clothing/dusters/platinum
+	name = "spiked platinum knuckle dusters"
+	result = /obj/item/clothing/gloves/dusters/platinum
+	steps = list(
+		list(CRAFT_MATERIAL, 3, MATERIAL_PLATINUM), //Grab some platinum
+		list(QUALITY_WELDING, 10, "time" = 30), //Weld it into basic form
+		list(QUALITY_HAMMERING, 15, 10), //Harden into shape
+		list(/obj/item/tool_upgrade/augment/spikes, 1, "time" = 10) //Put 'spiked' in the name
+	)
+
+/datum/craft_recipe/clothing/dusters/gloves
+	name = "weighted knuckle gloves"
+	result = /obj/item/clothing/gloves/dusters/gloves
+	steps = list(
+		list(/obj/item/clothing/gloves/knuckles, 1, "time" = 5), //Tear up the gloves
+		list(CRAFT_MATERIAL, 3, MATERIAL_PLASTEEL), //Grab some plasteel
+		list(QUALITY_HAMMERING, 15, 10), //Harden into powder
+		list(QUALITY_HAMMERING, 15, 10), //Harden into FINE powder
+		list(/obj/item/stack/medical/bruise_pack/handmade, 2, "time" = 10) //Cover the holes up
+	)
+
 /datum/craft_recipe/clothing/cardborg_suit
 	name = "cardborg suit"
 	result = /obj/item/clothing/suit/cardborg
@@ -81,21 +139,20 @@
 	)
 
 /datum/craft_recipe/clothing/armorvest
-	name = "armor vest"
+	name = "Makeshift armor vest"
 	result = /obj/item/clothing/suit/armor/vest/handmade
 	steps = list(
-		list(/obj/item/clothing/suit/storage/hazardvest, 1, "time" = 30),
-		list(CRAFT_MATERIAL, 4, MATERIAL_STEEL),
-		list(/obj/item/part/armor, 2),
+		list(/obj/item/clothing/under, 1),
+		list(CRAFT_MATERIAL, 5, MATERIAL_STEEL),
 		list(QUALITY_ADHESIVE, 15, 70)
 	)
 
 /datum/craft_recipe/clothing/armorvest/fullbody
-	name = "fullbody armor vest"
+	name = "Makeshift fullbody armor vest"
 	result = /obj/item/clothing/suit/armor/vest/handmade/full
 	steps = list(
-		list(/obj/item/clothing/suit/armor/vest/handmade, 1, "time" = 30),
-		list(/obj/item/part/armor, 4),
+		list(/obj/item/clothing/suit/armor/vest/handmade, 1),
+		list(CRAFT_MATERIAL, 10, MATERIAL_STEEL),
 		list(QUALITY_ADHESIVE, 15, 70)
 	)
 
@@ -138,7 +195,6 @@
 		list(CRAFT_MATERIAL, 2, MATERIAL_PLASTEEL),
 		list(CRAFT_MATERIAL, 2, MATERIAL_PLASTIC),
 		list(QUALITY_ADHESIVE, 15, 15),
-		list(CRAFT_MATERIAL, 2, MATERIAL_GLASS),
 		list(QUALITY_WELDING, 10, 20),
 	)
 
@@ -150,7 +206,6 @@
 		list(CRAFT_MATERIAL, 5, MATERIAL_PLASTEEL),
 		list(CRAFT_MATERIAL, 10, MATERIAL_PLASTIC),
 		list(QUALITY_ADHESIVE, 15, 15),
-		list(CRAFT_MATERIAL, 10, MATERIAL_GLASS),
 		list(QUALITY_WELDING, 10, 20),
 	)
 

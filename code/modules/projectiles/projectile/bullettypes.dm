@@ -19,7 +19,6 @@ There are important things regarding this file:
 	armor_divisor = 1
 	can_ricochet = TRUE
 	penetrating = 2
-	style_damage = 20
 	recoil = 3
 
 /obj/item/projectile/bullet/pistol/hv
@@ -51,12 +50,12 @@ There are important things regarding this file:
 
 /obj/item/projectile/bullet/srifle
 	name = ".20 caliber bullet"
-	damage_types = list(BRUTE = 32)
+	damage_types = list(BRUTE = 24)
 	armor_divisor = 1.5
 	penetrating = 2
 	can_ricochet = TRUE
 	recoil = 3
-	wounding_mult = WOUNDING_SMALL
+	wounding_mult = WOUNDING_INTERMEDIATE
 
 /obj/item/projectile/bullet/srifle/nomuzzle
 	muzzle_type = null
@@ -78,6 +77,7 @@ There are important things regarding this file:
 	damage_types = list(BRUTE = 9, HALLOSS = 9)
 	embed = FALSE
 	sharp = FALSE
+	wounding_mult = WOUNDING_SMALL
 
 /obj/item/projectile/bullet/srifle/scrap
 	armor_divisor = 1.2
@@ -160,7 +160,6 @@ There are important things regarding this file:
 	armor_divisor = 1
 	can_ricochet = TRUE
 	penetrating = 2
-	style_damage = 40
 	recoil = 6
 	wounding_mult = WOUNDING_WIDE
 
@@ -194,7 +193,6 @@ There are important things regarding this file:
 	armor_divisor = 3
 	penetrating = 2
 	step_delay = 0.8
-	style_damage = 70
 	recoil = 15 // Good luck shooting these from a revolver
 	wounding_mult = WOUNDING_EXTREME
 
@@ -246,8 +244,7 @@ There are important things regarding this file:
 	damage_types = list(BRUTE = 25)
 	armor_divisor = 1
 	knockback = 1
-	step_delay = 1.1
-	style_damage = 25
+	step_delay = 1
 	recoil = 8
 	wounding_mult = WOUNDING_EXTREME
 
@@ -265,7 +262,8 @@ There are important things regarding this file:
 	wounding_mult = WOUNDING_WIDE
 
 /obj/item/projectile/bullet/shotgun/beanbag/scrap
-	damage_types = list(BRUTE = 9, HALLOSS = 55)
+	damage_types = list(BRUTE = 9, HALLOSS = 20)
+	recoil = 10
 
 /obj/item/projectile/bullet/shotgun/practice
 	name = "practice slug"
@@ -304,7 +302,7 @@ There are important things regarding this file:
 	icon_state = "birdshot-[rand(1,4)]"
 
 /obj/item/projectile/bullet/pellet/shotgun/scrap
-	armor_divisor = 1.2
+	armor_divisor = 0.8
 	recoil = 5
 
 //Miscellaneous
@@ -329,7 +327,6 @@ There are important things regarding this file:
 	embed = FALSE
 	can_ricochet = TRUE
 	recoil = 3
-	style_damage = 40
 	wounding_mult = WOUNDING_EXTREME
 
 /obj/item/projectile/bullet/bolt/on_hit(mob/living/target, def_zone = BP_CHEST)

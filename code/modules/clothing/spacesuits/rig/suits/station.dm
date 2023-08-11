@@ -32,10 +32,10 @@
 	icon_state = "engineering_rig"
 	price_tag = 350
 	armor = list(
-		melee = 8,
-		bullet = 8,
+		melee = 10,
+		bullet = 10,
 		energy = 0,
-		bomb = 25,
+		bomb = 100,
 		bio = 100,
 		rad = 90
 	)
@@ -79,10 +79,10 @@
 	desc = "A light rig for repairs and maintenance to the outside of habitats and vessels."
 	icon_state = "eva_rig"
 	armor = list(
-		melee = 7,
-		bullet = 2,
-		energy = 2,
-		bomb = 10,
+		melee = 9,
+		bullet = 3,
+		energy = 3,
+		bomb = 25,
 		bio = 100,
 		rad = 100
 	)
@@ -122,9 +122,9 @@ Advanced Voidsuit: Technomancer Exultant
 	icon_state = "ce_rig"
 	rarity_value = 20
 	armor = list(
-		melee = 6,
-		bullet = 6,
-		energy = 6,
+		melee = 8,
+		bullet = 8,
+		energy = 8,
 		bomb = 50,
 		bio = 100,
 		rad = 100
@@ -151,9 +151,8 @@ Advanced Voidsuit: Technomancer Exultant
 	req_access = list(access_ce)
 	req_one_access = list()
 	spawn_blacklisted = TRUE//antag_item_targets
-	slowdown = LIGHT_SLOWDOWN
-	stiffness = 0
-	obscuration = 0
+	slowdown = LIGHT_SLOWDOWN * 1.1
+
 
 /obj/item/rig/ce/equipped
 	rarity_value = 40
@@ -185,9 +184,9 @@ Technomancer RIG
 	icon_state = "techno_rig"
 	rarity_value = 20
 	armor = list(
-		melee = 6,
-		bullet = 6,
-		energy = 6,
+		melee = 8,
+		bullet = 8,
+		energy = 8,
 		bomb = 50,
 		bio = 100,
 		rad = 100
@@ -245,8 +244,8 @@ Technomancer RIG
 	armor = list(
 		melee = 0,
 		bullet = 0,
-		energy = 5,
-		bomb = 90,
+		energy = 8,
+		bomb = 350,
 		bio = 100,
 		rad = 100
 	)
@@ -262,13 +261,8 @@ Technomancer RIG
 		/obj/item/tool,
 		/obj/item/device/scanner/health,
 		/obj/item/device/measuring_tape,
-		/obj/item/device/ano_scanner,
-		/obj/item/device/depth_scanner,
-		/obj/item/device/core_sampler,
 		/obj/item/device/gps,
-		/obj/item/device/beacon_locator,
 		/obj/item/device/radio/beacon,
-		/obj/item/storage/bag/fossils
 	)
 
 	req_access = list()
@@ -282,7 +276,6 @@ Technomancer RIG
 	initial_modules = list(
 		/obj/item/rig_module/ai_container,
 		/obj/item/rig_module/maneuvering_jets,
-		/obj/item/rig_module/device/anomaly_scanner,
 		/obj/item/rig_module/storage
 		)
 
@@ -297,8 +290,8 @@ Technomancer RIG
 	desc = "A relatively lightweight ceramic RIG suit designed for medical rescue in hazardous locations."
 	icon_state = "medical_rig"
 	armor = list(
-		melee = 2,
-		bullet = 0,
+		melee = 4,
+		bullet = 4,
 		energy = 0,
 		bomb = 50,
 		bio = 100,
@@ -316,8 +309,7 @@ Technomancer RIG
 		/obj/item/stack/medical,
 		/obj/item/roller
 	)
-	slowdown = HEAVY_SLOWDOWN * 0.5
-	stiffness = MEDIUM_STIFFNESS
+	slowdown = LIGHT_SLOWDOWN * 1.1
 
 /obj/item/rig/medical/equipped
 	req_access = list()

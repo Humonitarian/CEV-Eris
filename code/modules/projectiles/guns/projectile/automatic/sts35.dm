@@ -1,5 +1,5 @@
 /obj/item/gun/projectile/automatic/sts35
-	name = "OR SDF \"STS-35\""
+	name = "OR SDF AR .30 \"STS-35\""
 	desc = "The rugged STS-35 is a durable automatic weapon, made by Oberth Republic Self Defence Force. \
 			Extremely efficient rifle design that was put in service right before collapse of the Republic, this weapon can be found almost anywhere in the galaxy by now. \
 			Uses .30 Rifle rounds."
@@ -31,7 +31,7 @@
 		SEMI_AUTO_300,
 		BURST_3_ROUND
 		)
-	gun_parts = list(/obj/item/part/gun/frame/sts35 = 1, /obj/item/part/gun/grip/black = 1, /obj/item/part/gun/mechanism/autorifle = 1, /obj/item/part/gun/barrel/lrifle = 1)
+	gun_parts = list(/obj/item/part/gun/frame/sts35 = 1, /obj/item/part/gun/modular/grip/black = 1, /obj/item/part/gun/modular/mechanism/autorifle/determined = 1, /obj/item/part/gun/modular/barrel/lrifle = 1)
 	serial_type = "OR"
 
 
@@ -59,6 +59,6 @@
 	desc = "An STS-35 frame. The finest in kraut space magic."
 	icon_state = "frame_orrifle"
 	resultvars = list(/obj/item/gun/projectile/automatic/sts35)
-	gripvars = list(/obj/item/part/gun/grip/black)
-	mechanismvar = /obj/item/part/gun/mechanism/autorifle
-	barrelvars = list(/obj/item/part/gun/barrel/lrifle)
+	gripvars = list(/obj/item/part/gun/modular/grip/black)
+	mechanismvar = /obj/item/part/gun/modular/mechanism/autorifle/determined
+	barrelvars = list(/obj/item/part/gun/modular/barrel/lrifle)

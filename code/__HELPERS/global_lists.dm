@@ -10,6 +10,7 @@ GLOBAL_LIST_EMPTY(ships) // List of ships in the game.
 
 GLOBAL_LIST_EMPTY(mob_list)					//EVERY single mob, dead or alive
 GLOBAL_LIST_EMPTY(player_list)				//List of all mobs **with clients attached**. Excludes /mob/new_player
+GLOBAL_LIST_EMPTY(player_ghost_list)		// List of all ghosts with an connected client.
 GLOBAL_LIST_EMPTY(human_mob_list)				//List of all human mobs and sub-types, including clientless
 GLOBAL_LIST_EMPTY(silicon_mob_list)			//List of all silicon mobs, including clientless
 GLOBAL_LIST_EMPTY(living_mob_list)			//List of all alive mobs, including clientless. Excludes /mob/new_player
@@ -68,6 +69,7 @@ var/global/list/playable_species = list(SPECIES_HUMAN)    // A list of ALL playa
 
 // Posters
 GLOBAL_LIST_EMPTY(poster_designs)
+GLOBAL_LIST_EMPTY(poster_designs_asters)
 
 // Uplinks
 var/list/obj/item/device/uplink/world_uplinks = list()
@@ -237,10 +239,16 @@ GLOBAL_LIST_EMPTY(ignore_health_alerts_from)
 			whitelisted_species += S.name
 
 	//Posters
-	paths = subtypesof(/datum/poster) - /datum/poster/wanted
+	paths = subtypesof(/datum/poster) - /datum/poster/wanted - /datum/poster/asters
 	for(var/T in paths)
-		var/datum/poster/P = new T
-		GLOB.poster_designs += P
+		var/datum/poster/poster = new T
+		GLOB.poster_designs += poster
+
+	// Aster posters
+	paths = subtypesof(/datum/poster/asters) - /datum/poster/wanted
+	for(var/T in paths)
+		var/datum/poster/asters/poster = new T
+		GLOB.poster_designs_asters += poster
 
 	paths = subtypesof(/datum/hud)
 	for(var/T in paths)

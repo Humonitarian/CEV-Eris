@@ -157,9 +157,10 @@
 
 
 // Special return values from bullet_act(). Positive return values are already used to indicate the blocked level of the projectile.
-#define PROJECTILE_CONTINUE   -1 //if the projectile should continue flying after calling bullet_act()
-#define PROJECTILE_FORCE_MISS -2 //if the projectile should treat the attack as a miss (suppresses attack and admin logs) - only applies to mobs.
-#define PROJECTILE_FORCE_MISS_SILENCED -2.5 //if the projectile should do the same thing as above, but not give the miss message
+#define PROJECTILE_STOP					 1 //if the projectile should stop flying after calling bullet_act()
+#define PROJECTILE_CONTINUE				-1 //if the projectile should continue flying after calling bullet_act()
+#define PROJECTILE_FORCE_MISS			-2 //if the projectile should treat the attack as a miss (suppresses attack and admin logs) - only applies to mobs.
+#define PROJECTILE_FORCE_MISS_SILENCED	-2.5 //if the projectile should do the same thing as above, but not give the miss message
 
 //Camera capture modes
 #define CAPTURE_MODE_REGULAR 0 //Regular polaroid camera mode
@@ -176,7 +177,9 @@
 #define ANNOUNCER_NAME "CEV Eris System Announcer"
 
 
-#define LIST_OF_CONSONANT list("a", "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "á", "â", "ã", "ä", "æ", "ç", "é", "ê", "ë", "ì", "í", "ï", "ð", "ñ", "ò", "ô", "õ", "ö", "÷", "ø", "ù")
+#define LIST_OF_CONSONANT list("b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "á", "â", "ã", "ä", "æ", "ç", "é", "ê", "ë", "ì", "í", "ï", "ð", "ñ", "ò", "ô", "õ", "ö", "÷", "ø", "ù")
+#define LIST_OF_CONSONANT_RU list("б","в","г","д","ж","з","й","к","л","м","н","п","р","с","т","ф","х","ц","ш","щ")
+
 #define EN_ALPHABET list("a", "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z")
 //Multi-z
 #define FALL_GIB_DAMAGE 999
@@ -239,8 +242,8 @@
 #define SPAN_WARNING(text) "<span class='warning'>[text]</span>"
 #define SPAN_DANGER(text)  "<span class='danger'>[text]</span>"
 #define span(class, text) ("<span class='[class]'>[text]</span>")
-// the thing below allow using SPANning in datum definition, the above can't.
-#define SPAN(class, X) "<span class='" + ##class + "'>" + ##X + "</span>"
+
+#define FONT_COLORED(color, text) "<font color='[color]'>[text]</font>"
 
 #define text_starts_with(text, start) (copytext(text, 1, length(start) + 1) == start)
 

@@ -16,12 +16,22 @@
 	var/abstract = 0
 	var/r_speed = 1
 	var/health = 100
-	var/max_health = 100
+	var/maxHealth = 100
 	var/burn_point
 	var/burning
 	var/hitsound = 'sound/weapons/genhit1.ogg'
 	var/worksound
 	var/no_attack_log = 0			//If it's an item we don't want to log attack_logs with, set this to 1
+
+	//The cool stuff for melee
+	var/screen_shake = FALSE 		//If a weapon can shake the victim's camera on hit.
+	var/forced_broad_strike = FALSE //If a weapon is forced to always perform broad strikes.
+	var/extended_reach = FALSE		//Wielded spears can hit alive things one tile further.
+	var/ready = FALSE				//All weapons that are ITEM_SIZE_BULKY or bigger have double tact, meaning you have to click twice.
+	var/no_double_tact = FALSE		//for when you,  for some inconceivable reason, want a bulky item to not have double tact
+	var/push_attack = FALSE			//Hammers and spears can push the victim away on hit when you aim groin.
+	//Why are we using vars instead of defines or anything else?
+	//Because we need them to be shown in the tool info UI.
 
 	var/obj/item/master
 	var/list/origin_tech = list()	//Used by R&D to determine what research bonuses it grants.
@@ -53,8 +63,6 @@
 	var/siemens_coefficient = 1 // for electrical admittance/conductance (electrocution checks and shit)
 	var/slowdown = 0 // How much clothing is slowing you down. Negative values speeds you up
 	var/slowdown_hold // How much holding an item slows you down.
-	var/stiffness = 0 // How much recoil is caused by moving
-	var/obscuration = 0 // How much firearm accuracy is decreased
 
 	var/datum/armor/armor // Ref to the armor datum
 	var/list/allowed = list() //suit storage stuff.
@@ -80,7 +88,7 @@
 
 	//Damage vars
 	var/force = 0	//How much damage the weapon deals
-	var/embed_mult = 0.5 //Multiplier for the chance of embedding in mobs. Set to zero to completely disable embedding
+	var/embed_mult = 1 //Multiplier for the chance of embedding in mobs. Set to zero to completely disable embedding
 	var/structure_damage_factor = STRUCTURE_DAMAGE_NORMAL	//Multiplier applied to the damage when attacking structures and machinery
 	//Does not affect damage dealt to mobs
 	var/style = STYLE_NONE // how much using this item increases your style
@@ -115,7 +123,7 @@
 		loc = null
 
 	QDEL_NULL(hidden_uplink)
-	QDEL_NULL(blood_overlay)
+	blood_overlay = null
 	QDEL_NULL(action)
 	if(hud_actions)
 		for(var/action in hud_actions)
@@ -127,16 +135,14 @@
 /obj/item/get_fall_damage()
 	return w_class * 2
 
-/obj/item/ex_act(severity)
-	switch(severity)
-		if(1)
-			qdel(src)
-		if(2)
-			if(prob(50))
-				qdel(src)
-		if(3)
-			if(prob(5))
-				qdel(src)
+/obj/item/proc/take_damage(amount)
+	health -= amount
+	if(health <= 0)
+		qdel(src)
+
+/obj/item/explosion_act(target_power, explosion_handler/handler)
+	take_damage(target_power)
+	return 0
 
 /obj/item/emp_act(severity)
 	if(chameleon_type)
@@ -186,12 +192,30 @@
 	for(var/Q in tool_qualities)
 		message += "\n<blue>It possesses [tool_qualities[Q]] tier of [Q] quality.<blue>"
 
+	. = ..(user, distance, "", message)
+
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		if(H.stats.getPerk(PERK_MARKET_PROF))
-			message += SPAN_NOTICE("\nThis item cost: [get_item_cost()][CREDITS]")
+			to_chat(user,SPAN_NOTICE("Export value: [get_item_cost() * SStrade.get_export_price_multiplier(src)][CREDITS]"))
 
-	return ..(user, distance, "", message)
+			var/offer_message = "This item is requested at: "
+			var/has_offers = FALSE
+			for(var/datum/trade_station/TS in SStrade.discovered_stations)
+				for(var/path in TS.special_offers)
+					if(istype(src, path))
+						has_offers = TRUE
+						var/list/offer_content = TS.special_offers[path]
+						var/offer_price = offer_content["price"]
+						var/offer_amount = offer_content["amount"]
+						if(offer_amount)
+							offer_message += "[TS.name] ([round(offer_price / offer_amount, 1)][CREDITS] each, [offer_amount] requested), "
+						else
+							offer_message += "[TS.name] (offer fulfilled, awaiting new contract), "
+
+			if(has_offers)
+				offer_message = copytext(offer_message, 1, LAZYLEN(offer_message) - 1)
+				to_chat(user, SPAN_NOTICE(offer_message))
 
 /obj/item/attack_hand(mob/user as mob)
 	if(pre_pickup(user))
@@ -208,7 +232,7 @@
 	if(target.put_in_active_hand(src) && old_loc )
 		if((target != old_loc) && (target != old_loc.get_holding_mob()))
 			do_pickup_animation(target,old_loc)
-		SEND_SIGNAL(src, COMSIG_ITEM_PICKED, src, target)
+		SEND_SIGNAL_OLD(src, COMSIG_ITEM_PICKED, src, target)
 	add_hud_actions(target)
 
 /obj/item/attack_ai(mob/user as mob)
@@ -235,9 +259,9 @@
 	if(zoom)
 		zoom(user)
 	if(get_equip_slot() in unworn_slots)
-		SEND_SIGNAL(src, COMSIG_CLOTH_DROPPED, user)
+		SEND_SIGNAL_OLD(src, COMSIG_CLOTH_DROPPED, user)
 		if(user)
-			SEND_SIGNAL(user, COMSIG_CLOTH_DROPPED, src)
+			SEND_SIGNAL_OLD(user, COMSIG_CLOTH_DROPPED, src)
 
 
 //	Called before an item is picked up (loc is not yet changed)
@@ -248,12 +272,13 @@
 
 // called when this item is removed from a storage item, which is passed on as S. The loc variable is already set to the new destination before this is called.
 /obj/item/proc/on_exit_storage(obj/item/storage/the_storage)
-	SEND_SIGNAL(the_storage, COMSIG_STORAGE_TAKEN, src, the_storage)
+	SEND_SIGNAL(the_storage, COMSIG_STORAGE_TAKEN, src)
 	return
 
 // called when this item is added into a storage item, which is passed on as S. The loc variable is already set to the storage item.
 /obj/item/proc/on_enter_storage(obj/item/storage/the_storage)
 	SEND_SIGNAL(the_storage, COMSIG_STORAGE_INSERTED, src, the_storage)
+	//SEND_SIGNAL(src, COMSIG_ATOM_CONTAINERED, the_storage.getContainingMovable())
 	return
 
 // called when "found" in pockets and storage items. Returns 1 if the search should end.
@@ -454,10 +479,6 @@ var/global/list/items_blood_overlay_by_type = list()
 		if (grabbed)
 			if (grabbed.stats.getPerk(PERK_ASS_OF_CONCRETE))
 				visible_message(SPAN_WARNING("[src] tries to pick up [grabbed], and fails!"))
-				if (ishuman(src))
-					var/mob/living/carbon/human/depleted = src
-					depleted.regen_slickness(-1) // unlucky and unobservant gets the penalty
-					return
 
 			else
 				if(ishuman(grabbed)) // irish whip if human(grab special), else spin and force rest
@@ -478,12 +499,12 @@ var/global/list/items_blood_overlay_by_type = list()
 							visible_message(SPAN_WARNING("[grabbed] slams into the wall!"))
 							grabbed.damage_through_armor(15, BRUTE, BP_CHEST, ARMOR_MELEE)
 							break
-						
+
 						for(var/obj/structure/S in get_step(grabbed, whip_dir))
 							if(istype(S, /obj/structure/window))
 								visible_message(SPAN_WARNING("[grabbed] slams into \the [S]!"))
 								grabbed.damage_through_armor(25, BRUTE, BP_CHEST, ARMOR_MELEE)
-								
+
 								moves = 3
 								break
 							if(istype(S, /obj/structure/railing))
@@ -522,9 +543,6 @@ var/global/list/items_blood_overlay_by_type = list()
 			unEquip(I)
 			return
 		I.hand_spin(src)
-	if (ishuman(src))
-		var/mob/living/carbon/human/stylish = src
-		stylish.regen_slickness()
 
 /obj/item/proc/hand_spin(mob/living/carbon/caller) // used for custom behaviour on the above proc
 	return

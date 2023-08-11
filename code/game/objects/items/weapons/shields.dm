@@ -149,7 +149,7 @@
 	matter = list(MATERIAL_GLASS = 5, MATERIAL_STEEL = 5, MATERIAL_PLASTEEL = 12)
 	price_tag = 500
 	attack_verb = list("shoved", "bashed")
-	shield_integrity = 125
+	shield_integrity = 195
 	var/cooldown = 0 //shield bash cooldown. based on world.time
 	var/picked_by_human = FALSE
 	var/mob/living/carbon/human/picking_human
@@ -207,7 +207,7 @@
 	base_block_chance = 45
 	shield_difficulty = 35
 	attack_verb = list("shoved", "bashed")
-	shield_integrity = 135
+	shield_integrity = 205
 	var/cooldown = 0 //shield bash cooldown. based on world.time
 	var/picked_by_human = FALSE
 	var/mob/living/carbon/human/picking_human
@@ -248,25 +248,28 @@
 	else return get_protected_area(user)
 
 /obj/item/shield/riot/New()
-	RegisterSignal(src, COMSIG_ITEM_PICKED, .proc/is_picked)
-	RegisterSignal(src, COMSIG_ITEM_DROPPED, .proc/is_dropped)
+	RegisterSignal(src, COMSIG_ITEM_PICKED, PROC_REF(is_picked))
+	RegisterSignal(src, COMSIG_ITEM_DROPPED, PROC_REF(is_dropped))
 	return ..()
 
 /obj/item/shield/riot/proc/is_picked()
+	SIGNAL_HANDLER
 	var/mob/living/carbon/human/user = loc
 	if(istype(user))
 		picked_by_human = TRUE
 		picking_human = user
-		RegisterSignal(picking_human, COMSIG_HUMAN_WALKINTENT_CHANGE, .proc/update_state)
+		RegisterSignal(picking_human, COMSIG_HUMAN_WALKINTENT_CHANGE, PROC_REF(update_state))
 		update_state()
 
 /obj/item/shield/riot/proc/is_dropped()
+	SIGNAL_HANDLER
 	if(picked_by_human && picking_human)
 		UnregisterSignal(picking_human, COMSIG_HUMAN_WALKINTENT_CHANGE)
 		picked_by_human = FALSE
 		picking_human = null
 
 /obj/item/shield/riot/proc/update_state()
+	SIGNAL_HANDLER
 	if(!picking_human)
 		return
 	if(MOVING_QUICKLY(picking_human))
@@ -307,7 +310,7 @@
 	price_tag = 200
 	base_block_chance = 55
 	shield_difficulty = 10
-	shield_integrity = 160
+	shield_integrity = 230
 	slowdown_hold = 1
 
 /obj/item/shield/riot/dozershield/attackby(obj/item/W as obj, mob/user as mob)
@@ -335,7 +338,7 @@
 	base_block_chance = 60
 	shield_difficulty = 10
 	attack_verb = list("smashed", "bashed")
-	shield_integrity = 180
+	shield_integrity = 250
 	var/cooldown = 0 //shield bash cooldown. based on world.time
 	var/picked_by_human = FALSE
 	var/mob/living/carbon/human/picking_human
@@ -413,7 +416,7 @@
 	matter = list(MATERIAL_STEEL = 6)
 	base_block_chance = 35
 	shield_difficulty = 65
-	shield_integrity = 100
+	shield_integrity = 170
 
 /obj/item/shield/buckler/handmade/attackby(obj/item/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/extinguisher) || istype(W, /obj/item/storage/toolbox) || istype(W, /obj/item/melee))
@@ -432,7 +435,7 @@
 	matter = list(MATERIAL_STEEL = 4)
 	base_block_chance = 40
 	shield_difficulty = 30
-	shield_integrity = 85
+	shield_integrity = 155
 
 /obj/item/shield/riot/tray/get_protected_area(mob/user)
 	var/list/p_area = list(BP_CHEST, BP_HEAD, BP_L_ARM, BP_R_ARM, BP_GROIN)
@@ -467,7 +470,7 @@
 	var/active = 0
 	base_block_chance = 35
 	shield_difficulty = 70
-	shield_integrity = 130
+	shield_integrity = 200
 
 /obj/item/shield/buckler/energy/handle_shield(mob/user)
 	if(!active)

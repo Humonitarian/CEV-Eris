@@ -1,4 +1,4 @@
-/mob/living/carbon/New()
+/mob/living/carbon/Initialize()
 	//setup reagent holders
 	bloodstr = new /datum/reagents/metabolism(1000, src, CHEM_BLOOD)
 	ingested = new /datum/reagents/metabolism(1000, src, CHEM_INGEST)
@@ -7,17 +7,13 @@
 	reagents = bloodstr
 	..()
 
-/mob/living/carbon/Life()
-	. = ..()
-	handle_viruses()
-	// Increase germ_level regularly
-	if(germ_level < GERM_LEVEL_AMBIENT && prob(30))	//if you're just standing there, you shouldn't get more germs beyond an ambient level
-		germ_level++
-
 /mob/living/carbon/Destroy()
-	qdel(ingested)
-	qdel(touching)
-	// We don't qdel(bloodstr) because it's the same as qdel(reagents)
+	QDEL_NULL(metabolism_effects)
+	reagents = null
+	QDEL_NULL(ingested)
+	QDEL_NULL(touching)
+	QDEL_NULL(bloodstr)
+	QDEL_NULL(vessel)
 	QDEL_LIST(internal_organs)
 	QDEL_LIST(stomach_contents)
 	QDEL_LIST(hallucinations)
@@ -43,9 +39,6 @@
 		if(is_watching == TRUE)
 			reset_view(null)
 			is_watching = FALSE
-		// Moving around increases germ_level faster
-		if(germ_level < GERM_LEVEL_MOVE_CAP && prob(8))
-			germ_level++
 
 /mob/living/carbon/relaymove(var/mob/living/user, direction)
 	if((user in src.stomach_contents) && istype(user))
@@ -59,7 +52,7 @@
 					var/mob/living/carbon/human/H = src
 					var/obj/item/organ/external/organ = H.get_organ(BP_CHEST)
 					if (istype(organ))
-						if(organ.take_damage(d, 0))
+						if(organ.take_damage(d, BRUTE))
 							H.UpdateDamageIcon()
 					H.updatehealth()
 				else
@@ -108,9 +101,8 @@
 			"\red <B>You feel a powerful shock course through your body!</B>", \
 			"\red You hear a heavy electrical crack." \
 		)
-		SEND_SIGNAL(src, COMSIG_CARBON_ELECTROCTE)
-		Stun(10)//This should work for now, more is really silly and makes you lay there forever
-		Weaken(10)
+		SEND_SIGNAL_OLD(src, COMSIG_CARBON_ELECTROCTE)
+		Weaken(max(min(10,round(shock_damage / 10 )), 2) SECONDS)
 	else
 		src.visible_message(
 			"\red [src] was mildly shocked by the [source].", \
@@ -129,6 +121,10 @@
 	//We cache the held items before and after swapping using get active hand.
 	//This approach is future proof and will support people who possibly have >2 hands
 	var/obj/item/prev_held = get_active_hand()
+
+	if(prev_held)
+		if(prev_held.wielded)
+			prev_held.unwield(src)
 
 	//Now we do the hand swapping
 	src.hand = !( src.hand )
@@ -245,6 +241,9 @@
 /mob/living/carbon/proc/eyecheck()
 	return 0
 
+/mob/living/carbon/proc/earcheck()
+	return 0
+
 /mob/living/carbon/flash(duration = 0, drop_items = FALSE, doblind = FALSE, doblurry = FALSE)
 	if(blinded)
 		return
@@ -313,7 +312,6 @@
 
 		unEquip(item, loc)
 		item.throw_at(target, item.throw_range, item.throw_speed, src)
-		item.throwing = FALSE
 
 /mob/living/carbon/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	..()
@@ -361,8 +359,6 @@
 	if(now_pushing || !yes)
 		return
 	..()
-	if(iscarbon(AM) && prob(10))
-		src.spread_disease_to(AM, "Contact")
 
 /mob/living/carbon/cannot_use_vents()
 	return
@@ -411,9 +407,10 @@
 	<BR><A href='?src=\ref[user];refresh=1'>Refresh</A>
 	<BR><A href='?src=\ref[user];mach_close=mob[name]'>Close</A>
 	<BR>"}
-	user << browse(dat, text("window=mob[];size=325x500", name))
-	onclose(user, "mob[name]")
-	return
+
+	var/datum/browser/panel = new(user, "mob[name]", "Mob", 325, 400)
+	panel.set_content(dat)
+	panel.open()
 
 /mob/living/carbon/proc/should_have_process(var/organ_check)
 	return 0

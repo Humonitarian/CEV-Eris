@@ -29,6 +29,7 @@
 	rarity_value = 36
 	spawn_tags = SPAWN_TAG_MOB_ROOMBA
 
+
 /mob/living/simple_animal/hostile/roomba/death()
 	..()
 	visible_message("<b>[src]</b> blows apart!")
@@ -36,6 +37,15 @@
 	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
 	s.set_up(3, 1, src)
 	s.start()
+	if(prob(20))
+		var/os_components_reward = pick(list(
+			/obj/item/stock_parts/capacitor/one_star,
+			/obj/item/stock_parts/scanning_module/one_star,
+			/obj/item/stock_parts/manipulator/one_star,
+			/obj/item/stock_parts/micro_laser/one_star,
+			/obj/item/stock_parts/matter_bin/one_star
+		))
+		new os_components_reward(get_turf(src))
 	qdel(src)
 	return
 
@@ -67,7 +77,7 @@
 	. = ..()
 	if(.) // If we succeeded in hitting.
 		src.visible_message(SPAN_DANGER("\The [src] makes an odd warbling noise, fizzles, and explodes!"))
-		explosion(get_turf(loc), -1, -1, 2, 3)
+		explosion(get_turf(src), 250, 75)
 		death()
 
 /mob/living/simple_animal/hostile/roomba/gun_ba

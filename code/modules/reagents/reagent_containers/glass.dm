@@ -35,7 +35,6 @@
 		/mob/living/bot/medbot,
 		/obj/item/storage/secure/safe,
 		/obj/structure/medical_stand,
-		/obj/machinery/disease2/incubator,
 		/obj/machinery/disposal,
 		/mob/living/simple_animal/cow,
 		/mob/living/simple_animal/hostile/retaliate/goat,
@@ -43,7 +42,6 @@
 		/obj/machinery/smartfridge/,
 		/obj/machinery/biogenerator,
 		/obj/machinery/constructable_frame,
-		/obj/machinery/radiocarbon_spectrometer,
 		/obj/machinery/centrifuge,
 		/obj/machinery/electrolyzer
 		)

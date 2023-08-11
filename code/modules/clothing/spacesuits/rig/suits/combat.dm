@@ -8,10 +8,10 @@
 	icon_state = "security_rig"
 	suit_type = "combat hardsuit"
 	armor = list(
-		melee = 8,
-		bullet = 8,
-		energy = 8,
-		bomb = 50,
+		melee = 10,
+		bullet = 10,
+		energy = 10,
+		bomb = 200,
 		bio = 100,
 		rad = 50
 	)
@@ -22,8 +22,6 @@
 	rarity_value = 20
 	price_tag = 500
 	helm_type = /obj/item/clothing/head/space/rig/combat
-	stiffness = 0
-	obscuration = 0
 
 /obj/item/rig/combat/equipped
 	rarity_value = 40
@@ -69,10 +67,10 @@
 	desc = "A Security hardsuit designed for prolonged EVA in dangerous environments."
 	icon_state = "hazard_rig"
 	armor = list(
-		melee = 10,
-		bullet = 7,
-		energy = 7,
-		bomb = 90,
+		melee = 12,
+		bullet = 9,
+		energy = 9,
+		bomb = 150,
 		bio = 100,
 		rad = 100
 	)

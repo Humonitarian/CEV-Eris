@@ -86,6 +86,8 @@
 
 #define isgun(A) istype(A, /obj/item/gun)
 
+#define ismodulargun(A) istype(A, /obj/item/gun/projectile/automatic/modular)
+
 #define istool(A) istype(A, /obj/item/tool)
 
 #define isCoil(A) istype(A, /obj/item/stack/cable_coil)
@@ -94,14 +96,4 @@
 
 #define ismachinery(A) (istype(A, /obj/machinery))
 
-#define isWrench(A) istype(A, /obj/item/tool/wrench)
-
-#define isWelder(A) istype(A, /obj/item/tool/weldingtool)
-
-#define isWirecutter(A) istype(A, /obj/item/tool/wirecutters)
-
-#define isScrewdriver(A) istype(A, /obj/item/tool/screwdriver)
-
-#define isMultitool(A) istype(A, /obj/item/tool/multitool)
-
-#define isCrowbar(A) istype(A, /obj/item/tool/crowbar)
+#define isProjectile(A) (istype(A, /obj/item/projectile))

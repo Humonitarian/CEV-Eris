@@ -28,8 +28,7 @@
 	var/brightness_on
 	var/on = FALSE
 
-	stiffness = 0 // Recoil caused by moving, defined in obj/item
-	obscuration = 0 // Similar to tint, but decreases firearm accuracy instead via giving minimum extra offset, defined in obj/item
+
 
 	price_tag = 30
 
@@ -295,7 +294,8 @@
 	desc = "Protects your hearing from loud noises, and quiet ones as well."
 	icon_state = "earmuffs"
 	item_state = "earmuffs"
-	slot_flags = SLOT_EARS | SLOT_TWOEARS
+	slot_flags = SLOT_EARS
+	matter = list(MATERIAL_STEEL = 1, MATERIAL_PLASTIC = 1)
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -465,9 +465,6 @@ BLIND     // can't see anything
 	if(usr.put_in_hands(holding))
 		usr.visible_message(SPAN_DANGER("\The [usr] pulls a knife out of their boot!"))
 		holding = null
-		if (ishuman(usr))
-			var/mob/living/carbon/human/stylish = usr
-			stylish.regen_slickness()
 	else
 		to_chat(usr, SPAN_WARNING("You need an empty, unbroken hand to do that."))
 		holding.forceMove(src)
@@ -521,9 +518,6 @@ BLIND     // can't see anything
 			user.visible_message(SPAN_NOTICE("\The [user] shoves \the [I] into \the [src]."))
 			verbs |= /obj/item/clothing/shoes/proc/draw_knife
 			update_icon()
-			if (ishuman(user))
-				var/mob/living/carbon/human/depleted = user
-				depleted.regen_slickness(-1)
 	else
 		return ..()
 
@@ -591,6 +585,8 @@ BLIND     // can't see anything
 	style = STYLE_LOW
 	valid_accessory_slots = list("armor","armband","decor")
 	restricted_accessory_slots = list("armor","armband")
+	maxHealth = 300
+	health = 300
 
 /obj/item/clothing/suit/Initialize(mapload, ...)
 	.=..()
@@ -610,6 +606,7 @@ BLIND     // can't see anything
 	slot_flags = SLOT_ICLOTHING
 	w_class = ITEM_SIZE_NORMAL
 	spawn_tags = SPAWN_TAG_CLOTHING_UNDER
+	style = STYLE_LOW
 	bad_type = /obj/item/clothing/under
 	var/has_sensor = 1 //For the crew computer 2 = unable to change mode
 	var/sensor_mode = 0

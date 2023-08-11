@@ -9,10 +9,10 @@
 	icon_state = "merc_rig"
 	suit_type = "crimson hardsuit"
 	armor = list(
-		melee = 6,
-		bullet = 8,
-		energy = 3,
-		bomb = 75,
+		melee = 8,
+		bullet = 10,
+		energy = 5,
+		bomb = 200,
 		bio = 100,
 		rad = 50
 	)
@@ -36,8 +36,6 @@
 		/obj/item/rig_module/fabricator/energy_net,
 		/obj/item/rig_module/storage
 		)
-	stiffness = 0
-	obscuration = 0
 
 //Has most of the modules removed
 /obj/item/rig/merc/empty

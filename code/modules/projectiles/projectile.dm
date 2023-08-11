@@ -20,7 +20,6 @@
 	spawn_blacklisted = TRUE
 	spawn_frequency = 0
 	spawn_tags = null
-	style_damage = 13 // stylish people can dodge lots of projectiles
 	var/bumped = FALSE		//Prevents it from hitting more than one guy at once
 	var/hitsound_wall = "ricochet"
 	var/list/mob_hit_sound = list('sound/effects/gore/bullethit2.ogg', 'sound/effects/gore/bullethit3.ogg') //Sound it makes when it hits a mob. It's a list so you can put multiple hit sounds there.
@@ -34,6 +33,7 @@
 	var/atom/original = null // the target clicked (not necessarily where the projectile is headed). Should probably be renamed to 'target' or something.
 	var/turf/starting = null // the projectile's starting turf
 	var/list/permutated = list() // we've passed through these atoms, don't try to hit them again
+	var/height // starts undefined, used for Zlevel shooting
 
 	var/p_x = 16
 	var/p_y = 16 // the pixel location of the tile that the player clicked. Default is the center
@@ -91,6 +91,12 @@
 	var/matrix/effect_transform			// matrix to rotate and scale projectile effects - putting it here so it doesn't
 										//  have to be recreated multiple times
 
+/obj/item/projectile/Destroy()
+	firer = null
+	original = null
+	starting = null
+	LAZYCLEARLIST(permutated)
+	return ..()
 
 /obj/item/projectile/is_hot()
 	if (damage_types[BURN])
@@ -155,7 +161,7 @@
     impact_effect(effect_transform)
     if(luminosity_ttl && attached_effect)
         spawn(luminosity_ttl)
-        qdel(attached_effect)
+        QDEL_NULL(attached_effect)
 
     if(!ismob(A))
         playsound(src, hitsound_wall, 50, 1, -2)
@@ -168,8 +174,11 @@
 		return FALSE
 	return TRUE
 
-/obj/item/projectile/proc/get_structure_damage()
-	return damage_types[BRUTE] + damage_types[BURN]
+/obj/item/projectile/proc/get_structure_damage(var/injury_type)
+	if(!injury_type) // Assume homogenous
+		return (damage_types[BRUTE] + damage_types[BURN]) * wound_check(INJURY_TYPE_HOMOGENOUS, wounding_mult, edge, sharp) * 2
+	else
+		return (damage_types[BRUTE] + damage_types[BURN]) * wound_check(injury_type, wounding_mult, edge, sharp) * 2
 
 //return 1 if the projectile should be allowed to pass through after all, 0 if not.
 /obj/item/projectile/proc/check_penetrate(atom/A)
@@ -208,9 +217,8 @@
 	var/distance = get_dist(curloc, original)
 	check_hit_zone(distance, user_recoil)
 
-	spawn()
-		setup_trajectory(curloc, targloc, x_offset, y_offset, angle_offset) //plot the initial trajectory
-		Process()
+	setup_trajectory(curloc, targloc, x_offset, y_offset, angle_offset) //plot the initial trajectory
+	Process()
 
 	return FALSE
 
@@ -229,12 +237,18 @@
 		recoil = aimer.recoil
 		recoil -= projectile_accuracy
 
-		if(iscarbon(user))
-			var/mob/living/carbon/human/blanker = user
-			if(blanker.can_multiz_pb && (!isturf(target)))
-				loc = get_turf(blanker.client.eye)
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			if(H.can_multiz_pb && (!isturf(target)))
+				loc = get_turf(H.client.eye)
 				if(!(loc.Adjacent(target)))
-					loc = get_turf(blanker)
+					loc = get_turf(H)
+			if(config.z_level_shooting && H.client.eye == H.shadow && !height) // Player is watching a higher zlevel
+				var/newTurf = get_turf(H.shadow)
+				if(!(locate(/obj/structure/catwalk) in newTurf)) // Can't shoot through catwalks
+					loc = newTurf
+					height = HEIGHT_HIGH // We are shooting from below, this protects resting players at the expense of windows
+					original = get_turf(original) // Aim at turfs instead of mobs, to ensure we don't hit players
 
 	firer = user
 	shot_from = launcher.name
@@ -282,7 +296,7 @@
 	var/hit_mod = 0
 	switch(target_mob.mob_size)
 		if(120 to INFINITY)
-
+			hit_mod = -6
 		if(80 to 120)
 			hit_mod = -4
 		if(40 to 80)
@@ -309,7 +323,11 @@
 	//roll to-hit
 	miss_modifier = 0
 
-	var/result = PROJECTILE_FORCE_MISS
+	var/result = PROJECTILE_CONTINUE
+
+	if(config.z_level_shooting && height == HEIGHT_HIGH)
+		if(target_mob.resting == TRUE || target_mob.stat == TRUE)
+			return FALSE // Bullet flies overhead
 
 	if(target_mob != original) // If mob was not clicked on / is not an NPC's target, checks if the mob is concealed by cover
 		var/turf/cover_loc = get_step(get_turf(target_mob), get_dir(get_turf(target_mob), starting))
@@ -342,22 +360,24 @@
 //			qdel(src)
 //			return TRUE
 
-	result = target_mob.bullet_act(src, def_zone)
-
 	if(check_miss_chance(target_mob))
 		result = PROJECTILE_FORCE_MISS
+	else
+		result = target_mob.bullet_act(src, def_zone)
 
 	if(result == PROJECTILE_FORCE_MISS || result == PROJECTILE_FORCE_MISS_SILENCED)
 		if(!silenced && result == PROJECTILE_FORCE_MISS)
 			visible_message(SPAN_NOTICE("\The [src] misses [target_mob] narrowly!"))
+			if(isroach(target_mob))
+				bumped = FALSE // Roaches do not bump when missed, allowing the bullet to attempt to hit the rest of the roaches in a single cluster
 		return FALSE
-
+	/*
 	//hit messages
 	if(silenced)
 		to_chat(target_mob, SPAN_DANGER("You've been hit in the [parse_zone(def_zone)] by \the [src]!"))
 	else
 		visible_message(SPAN_DANGER("\The [target_mob] is hit by \the [src] in the [parse_zone(def_zone)]!"))//X has fired Y is now given by the guns so you cant tell who shot you if you could not see the shooter
-
+	*/
 	playsound(target_mob, pick(mob_hit_sound), 40, 1)
 
 	//admin logs
@@ -372,10 +392,6 @@
 		else
 			target_mob.attack_log += "\[[time_stamp()]\] <b>UNKNOWN SUBJECT (No longer exists)</b> shot <b>[target_mob]/[target_mob.ckey]</b> with <b>\a [src]</b>"
 			msg_admin_attack("UNKNOWN shot [target_mob] ([target_mob.ckey]) with \a [src] (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[target_mob.x];Y=[target_mob.y];Z=[target_mob.z]'>JMP</a>)")
-
-	//sometimes bullet_act() will want the projectile to continue flying
-	if (result == PROJECTILE_CONTINUE)
-		return FALSE
 
 	if(target_mob.mob_classification & CLASSIFICATION_ORGANIC)
 		var/turf/target_loca = get_turf(target_mob)
@@ -399,7 +415,10 @@
 		if(psy.contractor && result && (H.sanity.level <= 0))
 			psy.holder.reg_break(H)
 
-	return TRUE
+	if(result == PROJECTILE_STOP)
+		return TRUE
+	else
+		return FALSE
 
 /obj/item/projectile/Bump(atom/A as mob|obj|turf|area, forced = FALSE)
 	if(A == src)
@@ -423,6 +442,7 @@
 			trajectory.loc_z = loc.z
 			bumped = FALSE
 			return FALSE
+
 	if(ismob(A))
 		var/mob/M = A
 		if(isliving(A))
@@ -473,8 +493,9 @@
 	qdel(src)
 	return TRUE
 
-/obj/item/projectile/ex_act()
-	return //explosions probably shouldn't delete projectiles
+
+/obj/item/projectile/explosion_act(target_power, explosion_handler/handler)
+	return 0
 
 /obj/item/projectile/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	return TRUE
@@ -505,7 +526,7 @@
 		pixel_x = location.pixel_x
 		pixel_y = location.pixel_y
 
-		if(!bumped && !isturf(original))
+		if(!bumped && !QDELETED(original) && !isturf(original))
 			if(loc == get_turf(original))
 				if(!(original in permutated))
 					if(Bump(original))
@@ -612,6 +633,31 @@
 			P.pixel_x = location.pixel_x
 			P.pixel_y = location.pixel_y
 			P.activate(P.lifetime)
+
+/obj/item/projectile/proc/block_damage(var/amount, atom/A)
+	amount /= armor_divisor
+	var/dmg_total = 0
+	var/dmg_remaining = 0
+	for(var/dmg_type in damage_types)
+		var/dmg = damage_types[dmg_type]
+		if(!(dmg_type == HALLOSS))
+			dmg_total += dmg
+		if(dmg > 0 && amount > 0)
+			var/dmg_armor_difference = dmg - amount
+			var/is_difference_positive = dmg_armor_difference > 0
+			amount = is_difference_positive ? 0 : -dmg_armor_difference
+			dmg = is_difference_positive ? dmg_armor_difference : 0
+			if(!(dmg_type == HALLOSS))
+				dmg_remaining += dmg
+		if(dmg > 0)
+			damage_types[dmg_type] = dmg
+		else
+			damage_types -= dmg_type
+	if(!damage_types.len)
+		on_impact(A)
+		qdel(src)
+
+	return dmg_total > 0 ? (dmg_remaining / dmg_total) : 0
 
 //"Tracing" projectile
 /obj/item/projectile/test //Used to see if you can hit them.

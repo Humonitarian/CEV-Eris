@@ -29,7 +29,7 @@
 		melee = 7,
 		bullet = 10,
 		energy = 10,
-		bomb = 20,
+		bomb = 50,
 		bio = 0,
 		rad = 0
 	)
@@ -57,13 +57,12 @@
 		melee = 12,
 		bullet = 12,
 		energy = 12,
-		bomb = 25,
+		bomb = 75,
 		bio = 0,
 		rad = 0
 	)
 	flash_protection = FLASH_PROTECTION_MODERATE
 	price_tag = 500
-	obscuration = LIGHT_OBSCURATION
 	style_coverage = COVERS_WHOLE_HEAD
 
 /obj/item/clothing/head/armor/helmet/dermal
@@ -92,7 +91,7 @@
 		melee = 7,
 		bullet = 7,
 		energy = 3,
-		bomb = 50,
+		bomb = 100,
 		bio = 0,
 		rad = 80
 	)//Mix between hardhat.dm armor values, helmet armor values in armor.dm, and armor values for TM void helmet in station.dm.
@@ -115,15 +114,14 @@
 	action_button_name = "Toggle Headlamp"
 	brightness_on = 4
 	armor = list(
-		melee = 8,
-		bullet = 12,
-		energy = 7,
-		bomb = 40,
+		melee = 9,
+		bullet = 9,
+		energy = 9,
+		bomb = 100,
 		bio = 0,
 		rad = 0
 	)
 	flash_protection = FLASH_PROTECTION_MAJOR
-	obscuration = MEDIUM_OBSCURATION
 	price_tag = 500
 
 /obj/item/clothing/head/armor/helmet/handmade
@@ -134,7 +132,7 @@
 		melee = 7,
 		bullet = 7,
 		energy = 7,
-		bomb = 20,
+		bomb = 35,
 		bio = 0,
 		rad = 0
 	)
@@ -148,7 +146,7 @@
 		melee = 10,
 		bullet = 9,
 		energy = 7,
-		bomb = 20,
+		bomb = 35,
 		bio = 0,
 		rad = 0
 	)
@@ -171,7 +169,7 @@
 		melee = 7,
 		bullet = 15,
 		energy = 7,
-		bomb = 20,
+		bomb = 30,
 		bio = 0,
 		rad = 0
 	)
@@ -183,7 +181,6 @@
 		MATERIAL_PLASTEEL = 2, //Higher plasteel cost since it's booletproof
 		MATERIAL_GLASS = 3 //For the visor parts
 	)
-	obscuration = LIGHT_OBSCURATION
 	style_coverage = COVERS_WHOLE_HEAD
 
 /obj/item/clothing/head/armor/bulletproof/ironhammer_nvg //currently junk-only
@@ -282,7 +279,7 @@
 		melee = 7,
 		bullet = 7,
 		energy = 16,
-		bomb = 0,
+		bomb = 20,
 		bio = 0,
 		rad = 0
 	)
@@ -302,7 +299,6 @@
 	var/list/armor_down = list(melee = 0, bullet = 0, energy = 0, bomb = 0, bio = 0, rad = 0)
 
 	var/tint_down = TINT_LOW
-	var/obscuration_down = MEDIUM_OBSCURATION
 	flags_inv = HIDEEARS
 	var/flags_inv_down = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE|BLOCKHEADHAIR
 	body_parts_covered = HEAD|EARS
@@ -318,8 +314,8 @@
 	name = "riot helmet"
 	desc = "A helmet specifically designed to protect against close range attacks."
 	icon_state = "riot"
-	armor_up = list(melee = 7, bullet = 5, energy = 5, bomb = 20, bio = 0, rad = 0)
-	armor_down = list(melee = 10, bullet = 8, energy = 7, bomb = 35, bio = 0, rad = 0)
+	armor_up = list(melee = 7, bullet = 5, energy = 5, bomb = 35, bio = 0, rad = 0)
+	armor_down = list(melee = 10, bullet = 8, energy = 7, bomb = 50, bio = 0, rad = 0)
 	item_flags = THICKMATERIAL | COVER_PREVENT_MANIPULATION
 	price_tag = 150
 	matter = list(
@@ -346,7 +342,6 @@
 		armor = getArmor(arglist(armor_up))
 		flash_protection = initial(flash_protection)
 		tint = initial(tint)
-		obscuration = initial(obscuration)
 		flags_inv = initial(flags_inv)
 		body_parts_covered = initial(body_parts_covered)
 		style_coverage = initial(style_coverage)
@@ -354,7 +349,6 @@
 		armor = getArmor(arglist(armor_down))
 		flash_protection = flash_protection_down
 		tint = tint_down
-		obscuration = obscuration_down
 		flags_inv = flags_inv_down
 		body_parts_covered = body_parts_covered_down
 		style_coverage = COVERS_WHOLE_HEAD
@@ -390,14 +384,13 @@
 	icon_state = "light_riot"
 
 	tint = TINT_NONE
-	obscuration = LIGHT_OBSCURATION
 
 	body_parts_covered = HEAD|FACE|EARS
 	armor = list(
 		melee = 16,
 		bullet = 13,
 		energy = 10,
-		bomb = 35,
+		bomb = 75,
 		bio = 0,
 		rad = 0
 	)
@@ -471,7 +464,7 @@
 		melee = 10,
 		bullet = 10,
 		energy = 7,
-		bomb = 7,
+		bomb = 50,
 		bio = 0,
 		rad = 0
 	) // slightly buffed IHS helmet minus energy resistance
@@ -483,8 +476,8 @@
 	name = "altyn helmet"
 	desc = "A titanium helmet of serbian origin. Still widely used despite being discontinued."
 	icon_state = "altyn"
-	armor_up = list(melee = 5, bullet = 5, energy = 2, bomb = 15, bio = 0, rad = 0)
-	armor_down = list(melee = 10, bullet = 13, energy = 7, bomb = 35, bio = 0, rad = 0)
+	armor_up = list(melee = 5, bullet = 5, energy = 2, bomb = 30, bio = 0, rad = 0)
+	armor_down = list(melee = 10, bullet = 13, energy = 7, bomb = 50, bio = 0, rad = 0)
 	siemens_coefficient = 1
 	up = TRUE
 
@@ -502,7 +495,7 @@
 		melee = 14,
 		bullet = 15,
 		energy = 7,
-		bomb = 45,
+		bomb = 50,
 		bio = 0,
 		rad = 0
 	) // superior ballistic protection, mediocre laser protection.
@@ -535,7 +528,7 @@
 		melee = 7,
 		bullet = 10,
 		energy = 10,
-		bomb = 20,
+		bomb = 30,
 		bio = 0,
 		rad = 0
 	)
@@ -545,19 +538,19 @@
 	desc = "May God guide you."
 	icon_state = "crusader_hemet"
 	item_state = "crusader_hemet"
-	flags_inv = HIDEEARS|HIDEEYES|BLOCKHAIR
+	body_parts_covered = HEAD|FACE|EYES|EARS
+	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE|BLOCKHAIR
 	matter = list(MATERIAL_BIOMATTER = 15, MATERIAL_PLASTEEL = 5, MATERIAL_STEEL = 5, MATERIAL_GOLD = 1)
 	armor = list(
 		melee = 13,
 		bullet = 13,
 		energy = 13,
-		bomb = 25,
+		bomb = 75,
 		bio = 0,
 		rad = 0
 	)
 	unacidable = TRUE
 	spawn_blacklisted = TRUE
-	obscuration = MEDIUM_OBSCURATION // May God guide your aim
 	style_coverage = COVERS_WHOLE_HEAD
 
 /obj/item/clothing/head/armor/helmet/tanker
@@ -565,7 +558,7 @@
 	desc = "Protects the head from damage while you are in the exoskeleton."
 	icon_state = "tanker_helmet"
 	item_flags = THICKMATERIAL
-	flags_inv = HIDEEARS|BLOCKHAIR
+	flags_inv = HIDEEARS|BLOCKHEADHAIR
 	siemens_coefficient = 1
 	armor = list(
 		melee = 4,
@@ -605,7 +598,7 @@
 		melee = 5,
 		bullet = 5,
 		energy = 5,
-		bomb = 10,
+		bomb = 20,
 		bio = 100,
 		rad = 50
 		)
@@ -613,14 +606,13 @@
 		melee = 7,
 		bullet = 10,
 		energy = 10,
-		bomb = 20,
+		bomb = 50,
 		bio = 100,
 		rad = 50)
 	up = TRUE
 	spawn_blacklisted = TRUE
 	style = STYLE_HIGH
 	tint_down = TINT_NONE
-	obscuration_down = LIGHT_OBSCURATION
 	var/speaker_enabled = TRUE
 	var/scan_scheduled = FALSE
 	var/scan_interval = 15 SECONDS

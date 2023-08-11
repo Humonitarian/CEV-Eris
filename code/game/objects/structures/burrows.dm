@@ -13,9 +13,6 @@
 	level = BELOW_PLATING_LEVEL
 	layer = ABOVE_NORMAL_TURF_LAYER
 
-	//health is used when attempting to collapse this hole. It is a multiplier on the time taken and failure rate
-	//Any failed attempt to collapse it will reduce the health, making future attempts easier
-	var/health = 100
 
 	var/isSealed = TRUE	// borrow spawns as cracks and becomes a hole when critters emerge
 
@@ -97,6 +94,9 @@
 //Lets remove ourselves from the global list and cleanup any held references
 /obj/structure/burrow/Destroy()
 	GLOB.all_burrows.Remove(src)
+	populated_burrows -= src
+	unpopulated_burrows -= src
+	distressed_burrows -= src
 	target = null
 	recieving = null
 	//Eject any mobs that tunnelled through us
@@ -104,9 +104,9 @@
 		if (a.loc == src)
 			a.forceMove(loc)
 	population = list()
-	plantspread_burrows = list()
+	plantspread_burrows = list()	// Other burrows may still hold a reference to this burrow after it qdels
 	plant = null
-	.=..()
+	return ..()
 
 //This is called from the migration subsystem. It scans for nearby creatures
 //Any kind of simple or superior animal is valid, all of them are treated as population for this burrow
@@ -683,13 +683,12 @@ percentage is a value in the range 0..1 that determines what portion of this mob
 		to_chat(usr, SPAN_WARNING("You can see something move behind the cracks. You should weld them shut before it breaks through."))
 
 
-/obj/structure/burrow/ex_act(severity)
-	spawn(1)
-		var/turf/T = get_turf(src)
-		if(T.is_hole)
-			qdel(src)
-		else
-			collapse()
+/obj/structure/burrow/explosion_act(target_power, explosion_handler/handler)
+	. = ..()
+	if(QDELETED(src))
+		return 0
+	collapse()
+	return 0
 
 /obj/structure/burrow/preventsTurfInteractions()
 	if(isRevealed)

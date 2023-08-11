@@ -1,8 +1,9 @@
 /* Closets for specific jobs
  * Contains:
- *		Bartender
+ *		Club Manager
+ *      Club Worker
  *		Janitor
- *		Lawyer
+ *		Custodian
  *		Acolyte
  */
 
@@ -46,15 +47,15 @@
 	new /obj/item/storage/box/mousetraps(src)
 	new /obj/item/storage/box/mousetraps(src)
 	new /obj/item/clothing/under/rank/chef(src)
-	new /obj/item/reagent_containers/glass/beaker/bowl(src)
-	new /obj/item/reagent_containers/glass/beaker/bowl(src)
+	new /obj/item/reagent_containers/drywet(src)
+	new /obj/item/reagent_containers/drywet(src)
 	new /obj/item/clothing/head/chefhat(src)
 
 /*
  * Janitor
  */
 /obj/structure/closet/jcloset
-	name = "janitorial closet"
+	name = "janitorial closet" //legacy janitor
 	desc = "A storage unit for janitorial clothes and gear."
 	icon_door = "mixed"
 
@@ -99,8 +100,8 @@
 	new /obj/item/clothing/gloves/thick(src)
 	new /obj/item/clothing/suit/armor/custodian(src)
 	new /obj/item/clothing/head/armor/custodian(src)
-	new /obj/item/clothing/head/soft/purple(src)
-	new /obj/item/clothing/head/beret/purple(src)
+	//new /obj/item/clothing/head/soft/purple(src)
+	//new /obj/item/clothing/head/beret/purple(src)
 	new /obj/item/device/lighting/toggleable/flashlight(src)
 	new /obj/item/gun/matter/launcher/nt_sprayer(src)
 	new /obj/item/caution(src)
